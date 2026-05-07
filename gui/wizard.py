@@ -334,8 +334,10 @@ class Wizard(ctk.CTkFrame):
         self._depth = 0
         self._cookies_path = ""
         self._url_entry.delete(0, "end")
+        self._url_error.configure(text="")
         if last_url:
             self._url_entry.insert(0, last_url)
+        self._mode_error.configure(text="")
         for var in self._mode_vars.values():
             var.set(False)
         self._select_depth(0, DEPTH_LABELS[0][1])
