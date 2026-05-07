@@ -347,3 +347,18 @@ class Wizard(ctk.CTkFrame):
             self._adv_btn.configure(text="▸ Options avancées (optionnel)")
             self._adv_frame.pack_forget()
         self._show_step(0)
+
+    def prefill(self, url: str, modes: list, depth: int) -> None:
+        """Pré-remplir le wizard après reset() avec les paramètres d'une entrée historique."""
+        self._url = url
+        self._url_entry.delete(0, "end")
+        self._url_entry.insert(0, url)
+        self._modes = set()
+        for var in self._mode_vars.values():
+            var.set(False)
+        for mode_id in modes:
+            if mode_id in self._mode_vars:
+                self._mode_vars[mode_id].set(True)
+                self._modes.add(mode_id)
+        depth_idx = max(0, min(depth, len(DEPTH_LABELS) - 1))
+        self._select_depth(depth_idx, DEPTH_LABELS[depth_idx][1])
