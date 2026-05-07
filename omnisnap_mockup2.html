@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OmniSnap — Panneau de log</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; padding: 20px; }
+  h1 { color: #00B4D8; text-align: center; margin-bottom: 6px; font-size: 20px; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 28px; font-size: 12px; }
+
+  .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 28px; }
+
+  .option { border: 2px solid #2d2d4e; border-radius: 12px; overflow: hidden; }
+  .option-header { padding: 10px 16px; background: #2d2d4e; display: flex; align-items: center; gap: 10px; }
+  .option-letter { width: 26px; height: 26px; border-radius: 50%; background: #3a3a5c; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: #aaa; flex-shrink: 0; }
+  .option-title { font-weight: 600; font-size: 13px; }
+  .option-sub { font-size: 11px; color: #888; margin-left: auto; }
+
+  /* App window */
+  .app-window { background: #16213e; display: flex; height: 380px; }
+
+  /* Sidebar */
+  .sidebar { width: 150px; background: #1a1040; padding: 10px 7px; flex-shrink: 0; display: flex; flex-direction: column; gap: 3px; }
+  .sidebar-logo { color: #00B4D8; font-weight: 700; font-size: 13px; padding: 3px 8px 10px; border-bottom: 1px solid #2d2d4e; margin-bottom: 3px; }
+  .sidebar-btn { padding: 7px 9px; border-radius: 5px; font-size: 11px; display: flex; align-items: center; gap: 6px; color: #aaa; }
+  .sidebar-btn.active { background: #00B4D8; color: #0a0a1a; font-weight: 600; }
+  .sidebar-btn.disabled { opacity: 0.3; }
+  .sidebar-divider { height: 1px; background: #2d2d4e; margin: 5px 0; }
+  .sidebar-label { font-size: 9px; color: #444; padding: 1px 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .recent-item { padding: 4px 9px; font-size: 10px; color: #555; border-radius: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Common */
+  .main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .section-title { font-size: 10px; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: #2d2d4e; }
+
+  /* Progress bar */
+  .progress-bar { height: 4px; background: #0d0d26; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #00B4D8, #0077a8); border-radius: 2px; }
+
+  /* Log lines */
+  .log-area { background: #0a0a1a; border-radius: 6px; padding: 8px 10px; font-family: 'Consolas', monospace; font-size: 10px; line-height: 1.6; overflow-y: auto; flex: 1; }
+  .log-line { display: flex; gap: 8px; }
+  .log-time { color: #444; flex-shrink: 0; }
+  .log-ok { color: #4CAF50; }
+  .log-dl { color: #00B4D8; }
+  .log-warn { color: #FF9800; }
+  .log-info { color: #888; }
+  .log-cursor { animation: blink 1s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* Wizard mini */
+  .wizard-steps-mini { display: flex; gap: 0; padding: 8px 12px 0; }
+  .ws { flex: 1; text-align: center; padding: 4px 2px; font-size: 9px; border-bottom: 2px solid #2d2d4e; color: #444; }
+  .ws.done { border-color: #00B4D8; color: #444; }
+  .ws.done .wsn { color: #00B4D8; }
+  .wsn { display: block; font-size: 11px; font-weight: 700; margin-bottom: 1px; }
+  .ws.active { border-color: #ff9800; color: #ff9800; }
+  .ws.active .wsn { color: #ff9800; }
+
+  /* Buttons */
+  .btn-primary { background: #00B4D8; color: #0a0a1a; border: none; border-radius: 5px; padding: 7px 14px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .btn-danger { background: #c0392b; color: #fff; border: none; border-radius: 5px; padding: 7px 14px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .btn-secondary { background: #2d2d4e; color: #aaa; border: none; border-radius: 5px; padding: 7px 14px; font-size: 11px; cursor: pointer; }
+
+  /* Status badge */
+  .status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+  .status-running { background: rgba(255,152,0,0.15); color: #FF9800; border: 1px solid rgba(255,152,0,0.3); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #FF9800; animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+  /* Verdict */
+  .verdict { padding: 8px 14px 12px; background: #0f0f1e; }
+  .verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .verdict-pro { font-size: 10px; color: #4CAF50; display: flex; gap: 4px; }
+  .verdict-con { font-size: 10px; color: #ff7043; display: flex; gap: 4px; }
+
+  /* ===== OPTION A — Remplacement ===== */
+  .opt-a-form { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .opt-a-log { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+  /* ===== OPTION B — Split ===== */
+  .split-top { padding: 8px 12px; border-bottom: 1px solid #2d2d4e; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .split-top-url { font-size: 10px; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .split-top-modes { display: flex; gap: 4px; flex-wrap: wrap; }
+  .mode-tag { background: rgba(0,180,216,0.12); border: 1px solid rgba(0,180,216,0.25); color: #00B4D8; font-size: 9px; padding: 2px 7px; border-radius: 10px; }
+  .split-bottom { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+
+  /* ===== OPTION C — Onglets ===== */
+  .tabs-bar { display: flex; border-bottom: 1px solid #2d2d4e; flex-shrink: 0; }
+  .tab { flex: 1; text-align: center; padding: 8px 4px; font-size: 11px; color: #555; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: #00B4D8; border-bottom-color: #00B4D8; }
+  .tab-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* Mini wizard recap */
+  .recap-row { display: flex; gap: 6px; align-items: center; font-size: 10px; }
+  .recap-label { color: #555; min-width: 60px; }
+  .recap-value { color: #ccc; }
+</style>
+</head>
+<body>
+
+<h1>⚡ OmniSnap — Affichage pendant le scraping</h1>
+<p class="subtitle">Phase 1 · Wizard (option B choisie) · Pendant l'exécution, comment afficher les logs ?</p>
+
+<div class="options-grid">
+
+  <!-- OPTION A — Remplacement total -->
+  <div class="option">
+    <div class="option-header">
+      <div class="option-letter">A</div>
+      <span class="option-title">Remplacement — le log prend toute la place</span>
+      <span class="option-sub">Transition fluide</span>
+    </div>
+    <div class="app-window">
+      <div class="sidebar">
+        <div class="sidebar-logo">⚡ OmniSnap</div>
+        <div class="sidebar-btn active">🔍 Scraping…</div>
+        <div class="sidebar-btn disabled">🕐 Historique</div>
+        <div class="sidebar-btn disabled">⚙️ Paramètres</div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-label">Récent</div>
+        <div class="recent-item">freesound.org</div>
+        <div class="recent-item">python.org</div>
+      </div>
+      <div class="main">
+        <!-- État: formulaire remplacé par le log -->
+        <div class="opt-a-log">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#e0e0e0;margin-bottom:3px;">exemple.com/article</div>
+              <div class="status-badge status-running"><span class="status-dot"></span> En cours — étape 2/4</div>
+            </div>
+            <button class="btn-danger">⏹ Annuler</button>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div>
+          <div style="font-size:10px;color:#555;">12 / 26 pages · 3 vidéos téléchargées</div>
+          <div class="log-area">
+            <div class="log-line"><span class="log-time">10:42:01</span><span class="log-ok">✓ Page accueil analysée</span></div>
+            <div class="log-line"><span class="log-time">10:42:02</span><span class="log-dl">↓ video_intro.mp4 (18 MB)</span></div>
+            <div class="log-line"><span class="log-time">10:42:04</span><span class="log-ok">✓ video_intro.mp4</span></div>
+            <div class="log-line"><span class="log-time">10:42:05</span><span class="log-dl">↓ tutorial_01.mp4 (42 MB)</span></div>
+            <div class="log-line"><span class="log-time">10:42:09</span><span class="log-ok">✓ tutorial_01.mp4</span></div>
+            <div class="log-line"><span class="log-time">10:42:10</span><span class="log-info">→ /page2 en cours…</span></div>
+            <div class="log-line"><span class="log-time">10:42:11</span><span class="log-dl">↓ session_advanced.mp4 (78 MB)<span class="log-cursor">_</span></span></div>
+          </div>
+          <div style="display:flex;gap:6px;justify-content:flex-end;">
+            <button class="btn-secondary" style="font-size:10px;">Nouveau scrape</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="verdict-grid">
+        <div class="verdict-pro">✓ Log lisible, beaucoup d'espace</div>
+        <div class="verdict-con">✗ Formulaire complètement caché</div>
+        <div class="verdict-pro">✓ Focus total sur la progression</div>
+        <div class="verdict-con">✗ Impossible de voir les réglages</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION B — Split vertical -->
+  <div class="option">
+    <div class="option-header">
+      <div class="option-letter">B</div>
+      <span class="option-title">Split — résumé en haut, log en bas</span>
+      <span class="option-sub">Contexte + progression</span>
+    </div>
+    <div class="app-window">
+      <div class="sidebar">
+        <div class="sidebar-logo">⚡ OmniSnap</div>
+        <div class="sidebar-btn active">🔍 Scraping…</div>
+        <div class="sidebar-btn disabled">🕐 Historique</div>
+        <div class="sidebar-btn disabled">⚙️ Paramètres</div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-label">Récent</div>
+        <div class="recent-item">freesound.org</div>
+        <div class="recent-item">python.org</div>
+      </div>
+      <div class="main">
+        <!-- Résumé condensé en haut -->
+        <div class="split-top">
+          <div style="flex:1;min-width:0;">
+            <div class="split-top-url">https://exemple.com/article</div>
+            <div class="split-top-modes" style="margin-top:4px;">
+              <span class="mode-tag">📄 Texte</span>
+              <span class="mode-tag">🎬 Vidéos</span>
+              <span class="mode-tag">Profondeur +1</span>
+            </div>
+          </div>
+          <button class="btn-danger" style="font-size:10px;padding:5px 10px;">⏹ Annuler</button>
+        </div>
+        <!-- Barre de progression -->
+        <div style="padding:6px 12px 0;">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:#555;margin-bottom:4px;">
+            <span class="status-badge status-running" style="font-size:9px;"><span class="status-dot"></span>En cours</span>
+            <span>12 / 26 pages · 3 vidéos</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div>
+        </div>
+        <!-- Log -->
+        <div class="split-bottom">
+          <div class="section-title">Journal</div>
+          <div class="log-area">
+            <div class="log-line"><span class="log-time">10:42:01</span><span class="log-ok">✓ Page accueil analysée</span></div>
+            <div class="log-line"><span class="log-time">10:42:02</span><span class="log-dl">↓ video_intro.mp4 (18 MB)</span></div>
+            <div class="log-line"><span class="log-time">10:42:04</span><span class="log-ok">✓ video_intro.mp4</span></div>
+            <div class="log-line"><span class="log-time">10:42:05</span><span class="log-dl">↓ tutorial_01.mp4 (42 MB)</span></div>
+            <div class="log-line"><span class="log-time">10:42:09</span><span class="log-ok">✓ tutorial_01.mp4</span></div>
+            <div class="log-line"><span class="log-time">10:42:10</span><span class="log-info">→ /page2 en cours…</span></div>
+            <div class="log-line"><span class="log-time">10:42:11</span><span class="log-dl">↓ session_advanced.mp4 (78 MB)<span class="log-cursor">_</span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="verdict-grid">
+        <div class="verdict-pro">✓ Résumé toujours visible</div>
+        <div class="verdict-con">✗ Log plus petit qu'option A</div>
+        <div class="verdict-pro">✓ On sait toujours ce qu'on scrappe</div>
+        <div class="verdict-con">✗ Un peu chargé visuellement</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION C — Onglets -->
+  <div class="option">
+    <div class="option-header">
+      <div class="option-letter">C</div>
+      <span class="option-title">Onglets — Formulaire / Journal</span>
+      <span class="option-sub">Bascule manuelle</span>
+    </div>
+    <div class="app-window">
+      <div class="sidebar">
+        <div class="sidebar-logo">⚡ OmniSnap</div>
+        <div class="sidebar-btn active">🔍 Scraping…</div>
+        <div class="sidebar-btn disabled">🕐 Historique</div>
+        <div class="sidebar-btn disabled">⚙️ Paramètres</div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-label">Récent</div>
+        <div class="recent-item">freesound.org</div>
+        <div class="recent-item">python.org</div>
+      </div>
+      <div class="main">
+        <!-- Barre d'onglets -->
+        <div class="tabs-bar">
+          <div class="tab">📋 Réglages</div>
+          <div class="tab active">📟 Journal <span style="background:#FF9800;color:#000;border-radius:8px;padding:0 5px;font-size:9px;margin-left:3px;">EN COURS</span></div>
+        </div>
+        <!-- Contenu onglet Journal (actif) -->
+        <div class="tab-content" style="padding:8px 12px;gap:6px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="status-badge status-running"><span class="status-dot"></span>En cours — 12/26 pages</div>
+            <button class="btn-danger" style="font-size:10px;padding:5px 10px;">⏹ Annuler</button>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div>
+          <div class="log-area" style="flex:1;">
+            <div class="log-line"><span class="log-time">10:42:01</span><span class="log-ok">✓ Page accueil analysée</span></div>
+            <div class="log-line"><span class="log-time">10:42:02</span><span class="log-dl">↓ video_intro.mp4 (18 MB)</span></div>
+            <div class="log-line"><span class="log-time">10:42:04</span><span class="log-ok">✓ video_intro.mp4</span></div>
+            <div class="log-line"><span class="log-time">10:42:05</span><span class="log-dl">↓ tutorial_01.mp4 (42 MB)</span></div>
+            <div class="log-line"><span class="log-time">10:42:09</span><span class="log-ok">✓ tutorial_01.mp4</span></div>
+            <div class="log-line"><span class="log-time">10:42:10</span><span class="log-info">→ /page2 en cours…</span></div>
+            <div class="log-line"><span class="log-time">10:42:11</span><span class="log-dl">↓ session_advanced.mp4 (78 MB)<span class="log-cursor">_</span></span></div>
+          </div>
+          <div style="font-size:9px;color:#444;text-align:center;">← Cliquer sur "Réglages" pour revoir les paramètres</div>
+        </div>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="verdict-grid">
+        <div class="verdict-pro">✓ Log plein écran comme option A</div>
+        <div class="verdict-con">✗ Faut cliquer pour voir les réglages</div>
+        <div class="verdict-pro">✓ Accès aux réglages sans annuler</div>
+        <div class="verdict-con">✗ Log auto-scroll complique la nav</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;margin-top:20px;color:#444;font-size:11px;">
+  OmniSnap · Phase 1 · Wizard (B) · Affichage pendant scraping
+</div>
+
+</body>
+</html>

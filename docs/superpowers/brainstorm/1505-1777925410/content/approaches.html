@@ -1,0 +1,93 @@
+<h2>3 approches pour l'app Windows</h2>
+<p class="subtitle">Avec trade-offs — ma recommandation est marquée ⭐</p>
+
+<div class="options">
+
+  <div class="option" data-choice="pyinstaller" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>⭐ PyInstaller + CustomTkinter</h3>
+      <p><strong>Stack :</strong> Python pur — CustomTkinter pour l'UI, PyInstaller pour packager en .exe, Inno Setup pour l'installateur Windows</p>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <div style="flex:1;background:rgba(166,227,161,0.1);border:1px solid #a6e3a1;border-radius:6px;padding:8px;font-size:12px">
+          <div style="color:#a6e3a1;margin-bottom:4px">✅ Avantages</div>
+          <div>Zéro réécriture du scraper</div>
+          <div>Tu connais Python</div>
+          <div>UI moderne et propre</div>
+          <div>1 seul langage</div>
+        </div>
+        <div style="flex:1;background:rgba(243,139,168,0.1);border:1px solid #f38ba8;border-radius:6px;padding:8px;font-size:12px">
+          <div style="color:#f38ba8;margin-bottom:4px">⚠ Inconvénients</div>
+          <div>.exe assez lourd (~80 MB)</div>
+          <div>Moins flexible qu'un web UI</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;background:#313244;border-radius:6px;padding:8px;font-size:11px;display:flex;gap:12px">
+        <span>⏱ ~2-3 semaines</span>
+        <span>📦 .exe ~80 MB</span>
+        <span>🎯 Difficulté : Facile</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="electron" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Electron + FastAPI</h3>
+      <p><strong>Stack :</strong> Electron (Chromium + Node.js) pour l'interface web, FastAPI (Python) comme backend local, communication via HTTP localhost</p>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <div style="flex:1;background:rgba(166,227,161,0.1);border:1px solid #a6e3a1;border-radius:6px;padding:8px;font-size:12px">
+          <div style="color:#a6e3a1;margin-bottom:4px">✅ Avantages</div>
+          <div>UI ultra-polished (HTML/CSS)</div>
+          <div>Tu connais le web</div>
+          <div>Code UI réutilisable → app web</div>
+        </div>
+        <div style="flex:1;background:rgba(243,139,168,0.1);border:1px solid #f38ba8;border-radius:6px;padding:8px;font-size:12px">
+          <div style="color:#f38ba8;margin-bottom:4px">⚠ Inconvénients</div>
+          <div>.exe très lourd (~250 MB)</div>
+          <div>2 processus à gérer</div>
+          <div>Architecture complexe</div>
+          <div>Node + Python bundlés</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;background:#313244;border-radius:6px;padding:8px;font-size:11px;display:flex;gap:12px">
+        <span>⏱ ~4-5 semaines</span>
+        <span>📦 .exe ~250 MB</span>
+        <span>🎯 Difficulté : Moyenne</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="tauri" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Tauri + FastAPI</h3>
+      <p><strong>Stack :</strong> Tauri (Rust + WebView2 natif Windows) pour la fenêtre, FastAPI (Python) comme backend local — UI en HTML/CSS/JS</p>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <div style="flex:1;background:rgba(166,227,161,0.1);border:1px solid #a6e3a1;border-radius:6px;padding:8px;font-size:12px">
+          <div style="color:#a6e3a1;margin-bottom:4px">✅ Avantages</div>
+          <div>Très léger (~10 MB)</div>
+          <div>UI web (HTML/CSS)</div>
+          <div>Natif Windows</div>
+        </div>
+        <div style="flex:1;background:rgba(243,139,168,0.1);border:1px solid #f38ba8;border-radius:6px;padding:8px;font-size:12px">
+          <div style="color:#f38ba8;margin-bottom:4px">⚠ Inconvénients</div>
+          <div>Requiert Rust pour build</div>
+          <div>Plus complexe à setup</div>
+          <div>Python bundle séparé</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;background:#313244;border-radius:6px;padding:8px;font-size:11px;display:flex;gap:12px">
+        <span>⏱ ~5-6 semaines</span>
+        <span>📦 .exe ~15 MB</span>
+        <span>🎯 Difficulté : Difficile</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:20px;background:rgba(137,180,250,0.1);border:1px solid #89b4fa;border-radius:8px;padding:14px;font-size:13px">
+  <strong style="color:#89b4fa">💡 Ma recommandation : A (PyInstaller + CustomTkinter)</strong><br>
+  <span style="color:#a6adc8">Tu gardes tout ton code Python existant, l'UI CustomTkinter peut être très moderne et propre, et la complexité reste raisonnable. Electron est tentant vu tes skills web, mais l'architecture à 2 processus (Node + Python) complique beaucoup les choses pour un gain d'UI qui ne justifie pas le temps investi.</span>
+</div>

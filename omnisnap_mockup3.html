@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OmniSnap — État terminé</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; padding: 20px; }
+  h1 { color: #00B4D8; text-align: center; margin-bottom: 6px; font-size: 20px; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 28px; font-size: 12px; }
+
+  .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 28px; }
+
+  .option { border: 2px solid #2d2d4e; border-radius: 12px; overflow: hidden; }
+  .option-header { padding: 10px 16px; background: #2d2d4e; display: flex; align-items: center; gap: 10px; }
+  .option-letter { width: 26px; height: 26px; border-radius: 50%; background: #3a3a5c; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: #aaa; flex-shrink: 0; }
+  .option-title { font-weight: 600; font-size: 13px; }
+  .option-sub { font-size: 11px; color: #888; margin-left: auto; }
+
+  .app-window { background: #16213e; display: flex; height: 380px; }
+
+  .sidebar { width: 150px; background: #1a1040; padding: 10px 7px; flex-shrink: 0; display: flex; flex-direction: column; gap: 3px; }
+  .sidebar-logo { color: #00B4D8; font-weight: 700; font-size: 13px; padding: 3px 8px 10px; border-bottom: 1px solid #2d2d4e; margin-bottom: 3px; }
+  .sidebar-btn { padding: 7px 9px; border-radius: 5px; font-size: 11px; display: flex; align-items: center; gap: 6px; color: #aaa; }
+  .sidebar-btn.active { background: #00B4D8; color: #0a0a1a; font-weight: 600; }
+  .sidebar-btn.disabled { opacity: 0.3; }
+  .sidebar-divider { height: 1px; background: #2d2d4e; margin: 5px 0; }
+  .sidebar-label { font-size: 9px; color: #444; padding: 1px 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .recent-item { padding: 4px 9px; font-size: 10px; color: #555; border-radius: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .recent-item.new { color: #00B4D8; }
+
+  .main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+  .section-title { font-size: 10px; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: #2d2d4e; }
+
+  .progress-bar { height: 4px; background: #0d0d26; border-radius: 2px; overflow: hidden; }
+  .progress-fill-done { height: 100%; background: linear-gradient(90deg, #4CAF50, #2e7d32); border-radius: 2px; width: 100%; }
+
+  .log-area { background: #0a0a1a; border-radius: 6px; padding: 8px 10px; font-family: 'Consolas', monospace; font-size: 10px; line-height: 1.6; overflow-y: auto; flex: 1; }
+  .log-line { display: flex; gap: 8px; }
+  .log-time { color: #444; flex-shrink: 0; }
+  .log-ok { color: #4CAF50; }
+  .log-dl { color: #00B4D8; }
+  .log-done { color: #4CAF50; font-weight: 600; }
+
+  .btn-primary { background: #00B4D8; color: #0a0a1a; border: none; border-radius: 5px; padding: 7px 14px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .btn-success { background: #4CAF50; color: #fff; border: none; border-radius: 5px; padding: 7px 14px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .btn-secondary { background: #2d2d4e; color: #aaa; border: none; border-radius: 5px; padding: 7px 14px; font-size: 11px; cursor: pointer; }
+
+  .mode-tag { background: rgba(0,180,216,0.12); border: 1px solid rgba(0,180,216,0.25); color: #00B4D8; font-size: 9px; padding: 2px 7px; border-radius: 10px; }
+
+  .verdict { padding: 8px 14px 12px; background: #0f0f1e; }
+  .verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .verdict-pro { font-size: 10px; color: #4CAF50; display: flex; gap: 4px; }
+  .verdict-con { font-size: 10px; color: #ff7043; display: flex; gap: 4px; }
+
+  /* Bannière succès */
+  .success-banner { background: rgba(76,175,80,0.12); border: 1px solid rgba(76,175,80,0.3); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; }
+  .success-icon { font-size: 18px; flex-shrink: 0; }
+  .success-text { flex: 1; }
+  .success-title { font-size: 12px; font-weight: 700; color: #4CAF50; margin-bottom: 2px; }
+  .success-sub { font-size: 10px; color: #888; }
+
+  /* Stat cards */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .stat-card { background: #0d0d26; border: 1px solid #2d2d4e; border-radius: 6px; padding: 8px 10px; text-align: center; }
+  .stat-value { font-size: 16px; font-weight: 700; color: #00B4D8; }
+  .stat-label { font-size: 9px; color: #555; margin-top: 2px; }
+
+  /* Countdown */
+  .countdown { font-size: 10px; color: #555; text-align: center; }
+  .countdown span { color: #FF9800; }
+</style>
+</head>
+<body>
+
+<h1>⚡ OmniSnap — Quand le scraping est terminé</h1>
+<p class="subtitle">Phase 1 · Split (B choisi) · État après complétion avec succès</p>
+
+<div class="options-grid">
+
+  <!-- OPTION A — Bannière + bouton ouvrir -->
+  <div class="option">
+    <div class="option-header">
+      <div class="option-letter">A</div>
+      <span class="option-title">Bannière verte + "Ouvrir le dossier"</span>
+      <span class="option-sub">Log reste visible</span>
+    </div>
+    <div class="app-window">
+      <div class="sidebar">
+        <div class="sidebar-logo">⚡ OmniSnap</div>
+        <div class="sidebar-btn active">🔍 Nouveau scrape</div>
+        <div class="sidebar-btn disabled">🕐 Historique</div>
+        <div class="sidebar-btn disabled">⚙️ Paramètres</div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-label">Récent</div>
+        <div class="recent-item new">✓ exemple.com</div>
+        <div class="recent-item">freesound.org</div>
+        <div class="recent-item">python.org</div>
+      </div>
+      <div class="main">
+        <!-- Résumé haut condensé -->
+        <div style="padding:8px 12px;border-bottom:1px solid #2d2d4e;flex-shrink:0;">
+          <div style="font-size:10px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px;">https://exemple.com/article</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">
+            <span class="mode-tag">📄 Texte</span>
+            <span class="mode-tag">🎬 Vidéos</span>
+            <span class="mode-tag">Profondeur +1</span>
+          </div>
+        </div>
+        <!-- Log bas avec bannière en tête -->
+        <div style="padding:8px 12px;display:flex;flex-direction:column;gap:7px;flex:1;overflow:hidden;">
+          <!-- Bannière succès -->
+          <div class="success-banner">
+            <div class="success-icon">✅</div>
+            <div class="success-text">
+              <div class="success-title">Scraping terminé !</div>
+              <div class="success-sub">26 pages · 5 vidéos · 312 MB</div>
+            </div>
+            <button class="btn-success" style="font-size:10px;padding:5px 10px;">📂 Ouvrir</button>
+          </div>
+          <div class="progress-bar"><div class="progress-fill-done"></div></div>
+          <!-- Log -->
+          <div class="log-area">
+            <div class="log-line"><span class="log-time">10:42:11</span><span class="log-dl">↓ session_advanced.mp4 (78 MB)</span></div>
+            <div class="log-line"><span class="log-time">10:42:19</span><span class="log-ok">✓ session_advanced.mp4</span></div>
+            <div class="log-line"><span class="log-time">10:42:20</span><span class="log-ok">✓ /page25 analysée</span></div>
+            <div class="log-line"><span class="log-time">10:42:21</span><span class="log-ok">✓ /page26 analysée</span></div>
+            <div class="log-line"><span class="log-time">10:42:22</span><span class="log-done">✓ Terminé — 26 pages · 5 vidéos · 312 MB</span></div>
+          </div>
+          <div style="display:flex;gap:6px;justify-content:flex-end;">
+            <button class="btn-secondary" style="font-size:10px;">+ Nouveau scrape</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="verdict-grid">
+        <div class="verdict-pro">✓ Log complet encore lisible</div>
+        <div class="verdict-con">✗ Bouton "Ouvrir" peut sembler petit</div>
+        <div class="verdict-pro">✓ Simple, sans transition brusque</div>
+        <div class="verdict-con">✗ Moins de sentiment d'accomplissement</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION B — Retour auto -->
+  <div class="option">
+    <div class="option-header">
+      <div class="option-letter">B</div>
+      <span class="option-title">Retour automatique au wizard</span>
+      <span class="option-sub">Après 3 secondes</span>
+    </div>
+    <div class="app-window">
+      <div class="sidebar">
+        <div class="sidebar-logo">⚡ OmniSnap</div>
+        <div class="sidebar-btn active">🔍 Nouveau scrape</div>
+        <div class="sidebar-btn disabled">🕐 Historique</div>
+        <div class="sidebar-btn disabled">⚙️ Paramètres</div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-label">Récent</div>
+        <div class="recent-item new">✓ exemple.com</div>
+        <div class="recent-item">freesound.org</div>
+        <div class="recent-item">python.org</div>
+      </div>
+      <div class="main">
+        <!-- Wizard revenu — étape 1, URL pré-remplie -->
+        <div style="padding:10px 12px;border-bottom:1px solid #2d2d4e;flex-shrink:0;">
+          <!-- Flash succès bref -->
+          <div style="background:rgba(76,175,80,0.1);border:1px solid rgba(76,175,80,0.25);border-radius:5px;padding:5px 10px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:10px;color:#4CAF50;">✓ exemple.com terminé — 5 vidéos · 312 MB</span>
+            <span style="font-size:9px;color:#FF9800;">Retour dans <span style="font-weight:700;">2s</span></span>
+          </div>
+          <!-- Wizard étapes -->
+          <div style="display:flex;gap:0;">
+            <div style="flex:1;text-align:center;padding:4px 2px;font-size:9px;border-bottom:2px solid #00B4D8;color:#00B4D8;"><span style="display:block;font-size:11px;font-weight:700;margin-bottom:1px;">1</span>URL</div>
+            <div style="flex:1;text-align:center;padding:4px 2px;font-size:9px;border-bottom:2px solid #2d2d4e;color:#444;"><span style="display:block;font-size:11px;font-weight:700;margin-bottom:1px;">2</span>Contenu</div>
+            <div style="flex:1;text-align:center;padding:4px 2px;font-size:9px;border-bottom:2px solid #2d2d4e;color:#444;"><span style="display:block;font-size:11px;font-weight:700;margin-bottom:1px;">3</span>Options</div>
+            <div style="flex:1;text-align:center;padding:4px 2px;font-size:9px;border-bottom:2px solid #2d2d4e;color:#444;"><span style="display:block;font-size:11px;font-weight:700;margin-bottom:1px;">4</span>Lancer</div>
+          </div>
+        </div>
+        <div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex:1;">
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <div style="font-size:10px;color:#00B4D8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">URL</div>
+            <div style="background:#0d0d26;border:1px solid #2d2d4e;border-radius:5px;padding:7px 10px;font-size:11px;color:#888;">https://exemple.com/article</div>
+          </div>
+          <div style="font-size:10px;color:#555;line-height:1.5;">Entrez l'adresse de la page que vous souhaitez scraper.<br>Exemple : <span style="color:#00B4D8;">https://monsite.com/article</span></div>
+          <div style="margin-top:auto;display:flex;justify-content:flex-end;">
+            <button class="btn-primary">Suivant →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="verdict-grid">
+        <div class="verdict-pro">✓ Fluidité, enchaîner les scrapes vite</div>
+        <div class="verdict-con">✗ On perd le log dès le retour</div>
+        <div class="verdict-pro">✓ Sensation d'app réactive</div>
+        <div class="verdict-con">✗ Peut surprendre si on lit encore le log</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION C — Résumé complet -->
+  <div class="option">
+    <div class="option-header">
+      <div class="option-letter">C</div>
+      <span class="option-title">Résumé complet avec statistiques</span>
+      <span class="option-sub">★ Recommandé</span>
+    </div>
+    <div class="app-window">
+      <div class="sidebar">
+        <div class="sidebar-logo">⚡ OmniSnap</div>
+        <div class="sidebar-btn active">🔍 Nouveau scrape</div>
+        <div class="sidebar-btn disabled">🕐 Historique</div>
+        <div class="sidebar-btn disabled">⚙️ Paramètres</div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-label">Récent</div>
+        <div class="recent-item new">✓ exemple.com</div>
+        <div class="recent-item">freesound.org</div>
+        <div class="recent-item">python.org</div>
+      </div>
+      <div class="main">
+        <!-- Haut : résumé transformé en succès -->
+        <div style="padding:10px 12px;border-bottom:1px solid rgba(76,175,80,0.2);background:rgba(76,175,80,0.05);flex-shrink:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:16px;">✅</span>
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:700;color:#4CAF50;">Scraping terminé !</div>
+              <div style="font-size:10px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">exemple.com/article</div>
+            </div>
+            <button class="btn-success" style="font-size:10px;padding:5px 10px;">📂 Ouvrir le dossier</button>
+          </div>
+          <!-- Stats -->
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-value">26</div>
+              <div class="stat-label">Pages traitées</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">5</div>
+              <div class="stat-label">Vidéos sauvées</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">312 MB</div>
+              <div class="stat-label">Téléchargés</div>
+            </div>
+          </div>
+        </div>
+        <!-- Bas : log + bouton nouveau -->
+        <div style="padding:8px 12px;display:flex;flex-direction:column;gap:6px;flex:1;overflow:hidden;">
+          <div class="log-area">
+            <div class="log-line"><span class="log-time">10:42:19</span><span class="log-ok">✓ session_advanced.mp4</span></div>
+            <div class="log-line"><span class="log-time">10:42:20</span><span class="log-ok">✓ /page25 analysée</span></div>
+            <div class="log-line"><span class="log-time">10:42:21</span><span class="log-ok">✓ /page26 analysée</span></div>
+            <div class="log-line"><span class="log-time">10:42:22</span><span class="log-done">✓ Terminé — 26 pages · 5 vidéos · 312 MB</span></div>
+          </div>
+          <div style="display:flex;gap:6px;justify-content:flex-end;">
+            <button class="btn-secondary" style="font-size:10px;">+ Nouveau scrape</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="verdict-grid">
+        <div class="verdict-pro">✓ Satisfaction visuelle claire</div>
+        <div class="verdict-con">✗ Un peu plus à implémenter</div>
+        <div class="verdict-pro">✓ Stats utiles d'un coup d'œil</div>
+        <div class="verdict-con">✗ Statistiques à calculer côté backend</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;margin-top:20px;color:#444;font-size:11px;">
+  OmniSnap · Phase 1 · Split (B) · État après complétion
+</div>
+
+</body>
+</html>

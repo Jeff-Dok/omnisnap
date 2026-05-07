@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OmniSnap — Comparaison des designs</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; padding: 20px; }
+  h1 { color: #00B4D8; text-align: center; margin-bottom: 8px; font-size: 22px; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 30px; font-size: 13px; }
+
+  .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 24px; }
+
+  .option { border: 2px solid #2d2d4e; border-radius: 12px; overflow: hidden; }
+  .option.recommended { border-color: #00B4D8; }
+  .option-header { padding: 12px 16px; background: #2d2d4e; display: flex; align-items: center; gap: 10px; }
+  .option-letter { width: 28px; height: 28px; border-radius: 50%; background: #3a3a5c; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: #aaa; }
+  .option.recommended .option-letter { background: #00B4D8; color: #0a0a1a; }
+  .option-title { font-weight: 600; font-size: 14px; }
+  .option-desc { font-size: 11px; color: #888; margin-left: auto; }
+  .option.recommended .option-title { color: #00B4D8; }
+
+  /* App window mockup */
+  .app-window { margin: 0; background: #16213e; min-height: 400px; display: flex; }
+
+  /* Sidebar */
+  .sidebar { width: 160px; background: #1a1040; padding: 12px 8px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
+  .sidebar-logo { color: #00B4D8; font-weight: 700; font-size: 14px; padding: 4px 8px 12px; border-bottom: 1px solid #2d2d4e; margin-bottom: 4px; }
+  .sidebar-btn { padding: 8px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 7px; color: #aaa; transition: all 0.2s; }
+  .sidebar-btn.active { background: #00B4D8; color: #0a0a1a; font-weight: 600; }
+  .sidebar-btn.disabled { opacity: 0.35; cursor: not-allowed; }
+  .sidebar-divider { height: 1px; background: #2d2d4e; margin: 6px 0; }
+  .sidebar-label { font-size: 10px; color: #555; padding: 2px 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .recent-item { padding: 5px 10px; font-size: 10px; color: #666; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+  .recent-item:hover { color: #aaa; background: #2d2d4e; }
+
+  /* Main content */
+  .main { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+
+  /* Form elements */
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-label { font-size: 11px; color: #00B4D8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input { background: #0d0d26; border: 1px solid #2d2d4e; border-radius: 6px; padding: 8px 12px; color: #e0e0e0; font-size: 13px; }
+  .form-input:focus { border-color: #00B4D8; outline: none; }
+  .form-input.url { font-size: 12px; }
+
+  /* Option A - Formulaire scrollable */
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .mode-item { background: #0d0d26; border: 1px solid #2d2d4e; border-radius: 6px; padding: 8px 10px; cursor: pointer; transition: all 0.2s; }
+  .mode-item:hover, .mode-item.selected { border-color: #00B4D8; background: rgba(0,180,216,0.08); }
+  .mode-item-top { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .mode-icon { font-size: 14px; }
+  .mode-name { font-size: 12px; font-weight: 600; color: #e0e0e0; }
+  .mode-desc { font-size: 10px; color: #666; line-height: 1.3; }
+  .checkbox { width: 14px; height: 14px; border: 1px solid #555; border-radius: 3px; margin-left: auto; display: flex; align-items: center; justify-content: center; }
+  .checkbox.checked { background: #00B4D8; border-color: #00B4D8; color: #000; font-size: 9px; }
+
+  .depth-row { display: flex; gap: 6px; }
+  .depth-btn { flex: 1; background: #0d0d26; border: 1px solid #2d2d4e; border-radius: 5px; padding: 6px; text-align: center; font-size: 11px; cursor: pointer; }
+  .depth-btn.active { border-color: #00B4D8; color: #00B4D8; background: rgba(0,180,216,0.08); }
+
+  .section-title { font-size: 11px; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: #2d2d4e; }
+
+  /* Option B - Wizard */
+  .wizard-steps { display: flex; gap: 0; margin-bottom: 12px; }
+  .wizard-step { flex: 1; text-align: center; padding: 6px 2px; font-size: 10px; border-bottom: 2px solid #2d2d4e; color: #555; }
+  .wizard-step.active { border-color: #00B4D8; color: #00B4D8; font-weight: 600; }
+  .wizard-step.done { border-color: #00B4D8; color: #555; }
+  .wizard-step .step-num { display: block; font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .wizard-step.done .step-num { color: #00B4D8; }
+
+  .wizard-question { background: #0d0d26; border-radius: 8px; padding: 14px; }
+  .wizard-q-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .wizard-q-hint { font-size: 11px; color: #888; margin-bottom: 12px; line-height: 1.4; }
+  .wizard-options { display: flex; flex-direction: column; gap: 7px; }
+  .wizard-opt { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 6px; padding: 10px 12px; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; }
+  .wizard-opt:hover, .wizard-opt.selected { border-color: #00B4D8; background: rgba(0,180,216,0.06); }
+  .wizard-opt-icon { font-size: 18px; line-height: 1; }
+  .wizard-opt-text { flex: 1; }
+  .wizard-opt-name { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+  .wizard-opt-desc { font-size: 10px; color: #777; line-height: 1.3; }
+  .wizard-nav { display: flex; justify-content: space-between; margin-top: 10px; }
+  .btn-primary { background: #00B4D8; color: #0a0a1a; border: none; border-radius: 6px; padding: 8px 18px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .btn-secondary { background: #2d2d4e; color: #aaa; border: none; border-radius: 6px; padding: 8px 18px; font-size: 12px; cursor: pointer; }
+
+  /* Option D - Profils */
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .profile-card { background: #0d0d26; border: 2px solid #2d2d4e; border-radius: 8px; padding: 12px; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .profile-card:hover { border-color: #00B4D8; background: rgba(0,180,216,0.06); transform: translateY(-1px); }
+  .profile-card.selected { border-color: #00B4D8; background: rgba(0,180,216,0.1); }
+  .profile-card.expert { border-style: dashed; }
+  .profile-icon { font-size: 26px; margin-bottom: 6px; display: block; }
+  .profile-name { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+  .profile-desc { font-size: 10px; color: #666; line-height: 1.3; }
+  .profile-selected-config { background: rgba(0,180,216,0.05); border: 1px solid rgba(0,180,216,0.2); border-radius: 8px; padding: 10px 12px; }
+  .config-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; }
+  .config-label { color: #888; min-width: 70px; }
+  .config-value { color: #e0e0e0; }
+  .config-change { color: #00B4D8; font-size: 10px; cursor: pointer; margin-left: auto; }
+
+  /* Launch button */
+  .launch-btn { background: #00B4D8; color: #0a0a1a; border: none; border-radius: 8px; padding: 10px 20px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; letter-spacing: 0.3px; }
+  .launch-btn:hover { background: #0096b4; }
+
+  /* Pros/cons */
+  .verdict { padding: 10px 16px 14px; background: #0f0f1e; }
+  .verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .verdict-pro, .verdict-con { font-size: 11px; display: flex; gap: 5px; }
+  .verdict-pro { color: #4CAF50; }
+  .verdict-con { color: #ff7043; }
+</style>
+</head>
+<body>
+
+<h1>⚡ OmniSnap — Comparaison des designs</h1>
+<p class="subtitle">Phase 1 · Formulaire de scrape · Cliquez sur les éléments pour voir les interactions</p>
+
+<div class="options-grid">
+
+  <!-- OPTION A -->
+  <div class="option">
+    <div class="option-header">
+      <div class="option-letter">A</div>
+      <span class="option-title">Formulaire complet scrollable</span>
+      <span class="option-desc">Tout visible d'un coup</span>
+    </div>
+    <div class="app-window">
+      <div class="sidebar">
+        <div class="sidebar-logo">⚡ OmniSnap</div>
+        <div class="sidebar-btn active">🔍 Nouveau scrape</div>
+        <div class="sidebar-btn disabled">🕐 Historique</div>
+        <div class="sidebar-btn disabled">⚙️ Paramètres</div>
+      </div>
+      <div class="main">
+        <div class="form-group">
+          <div class="form-label">URL</div>
+          <div class="form-input url">https://exemple.com/article</div>
+        </div>
+        <div class="section-title">Que voulez-vous récupérer ?</div>
+        <div class="mode-grid">
+          <div class="mode-item selected">
+            <div class="mode-item-top"><span class="mode-icon">📄</span><span class="mode-name">Texte</span><div class="checkbox checked">✓</div></div>
+            <div class="mode-desc">Contenu lisible, idéal pour lire un article</div>
+          </div>
+          <div class="mode-item">
+            <div class="mode-item-top"><span class="mode-icon">🖼️</span><span class="mode-name">Images</span><div class="checkbox"></div></div>
+            <div class="mode-desc">Toutes les photos et illustrations</div>
+          </div>
+          <div class="mode-item selected">
+            <div class="mode-item-top"><span class="mode-icon">🎬</span><span class="mode-name">Vidéos</span><div class="checkbox checked">✓</div></div>
+            <div class="mode-desc">Fichiers vidéo mp4, webm...</div>
+          </div>
+          <div class="mode-item">
+            <div class="mode-item-top"><span class="mode-icon">🎵</span><span class="mode-name">Audios</span><div class="checkbox"></div></div>
+            <div class="mode-desc">Fichiers mp3, wav, flac...</div>
+          </div>
+          <div class="mode-item">
+            <div class="mode-item-top"><span class="mode-icon">📁</span><span class="mode-name">Documents</span><div class="checkbox"></div></div>
+            <div class="mode-desc">PDF, Word, Excel...</div>
+          </div>
+          <div class="mode-item">
+            <div class="mode-item-top"><span class="mode-icon">📷</span><span class="mode-name">Screenshot</span><div class="checkbox"></div></div>
+            <div class="mode-desc">Capture d'écran de la page</div>
+          </div>
+        </div>
+        <div class="section-title">Profondeur de crawl</div>
+        <div class="depth-row">
+          <div class="depth-btn active">0<br><span style="font-size:9px;color:#555">Page seule</span></div>
+          <div class="depth-btn">+1<br><span style="font-size:9px;color:#555">Liens directs</span></div>
+          <div class="depth-btn">+2<br><span style="font-size:9px;color:#555">2 niveaux</span></div>
+          <div class="depth-btn">+3<br><span style="font-size:9px;color:#555">3 niveaux</span></div>
+        </div>
+        <button class="launch-btn">▶ Lancer le scraping</button>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="verdict-grid">
+        <div class="verdict-pro">✓ Tout visible, pas de navigation</div>
+        <div class="verdict-con">✗ Peut sembler long au 1er coup d'œil</div>
+        <div class="verdict-pro">✓ Rapide à modifier</div>
+        <div class="verdict-con">✗ Les descriptions sont courtes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION B -->
+  <div class="option">
+    <div class="option-header">
+      <div class="option-letter">B</div>
+      <span class="option-title">Wizard étape par étape</span>
+      <span class="option-desc">Guidé comme le CLI</span>
+    </div>
+    <div class="app-window">
+      <div class="sidebar">
+        <div class="sidebar-logo">⚡ OmniSnap</div>
+        <div class="sidebar-btn active">🔍 Nouveau scrape</div>
+        <div class="sidebar-btn disabled">🕐 Historique</div>
+        <div class="sidebar-btn disabled">⚙️ Paramètres</div>
+      </div>
+      <div class="main">
+        <div class="wizard-steps">
+          <div class="wizard-step done"><span class="step-num">✓</span>URL</div>
+          <div class="wizard-step active"><span class="step-num">2</span>Contenu</div>
+          <div class="wizard-step"><span class="step-num">3</span>Options</div>
+          <div class="wizard-step"><span class="step-num">4</span>Lancer</div>
+        </div>
+        <div class="wizard-question">
+          <div class="wizard-q-title">Que voulez-vous récupérer ?</div>
+          <div class="wizard-q-hint">Vous pouvez choisir plusieurs types. Chaque type sera sauvegardé dans son propre dossier.</div>
+          <div class="wizard-options">
+            <div class="wizard-opt selected">
+              <div class="wizard-opt-icon">📄</div>
+              <div class="wizard-opt-text">
+                <div class="wizard-opt-name">Texte de l'article</div>
+                <div class="wizard-opt-desc">Le contenu lisible de la page — idéal pour lire hors ligne ou analyser le contenu. Format .txt</div>
+              </div>
+              <div class="checkbox checked" style="margin-top:3px">✓</div>
+            </div>
+            <div class="wizard-opt">
+              <div class="wizard-opt-icon">🎬</div>
+              <div class="wizard-opt-text">
+                <div class="wizard-opt-name">Vidéos</div>
+                <div class="wizard-opt-desc">Télécharge les fichiers vidéo présents sur la page (mp4, webm...). Ne fonctionne pas pour YouTube.</div>
+              </div>
+              <div class="checkbox" style="margin-top:3px"></div>
+            </div>
+            <div class="wizard-opt">
+              <div class="wizard-opt-icon">🖼️</div>
+              <div class="wizard-opt-text">
+                <div class="wizard-opt-name">Images</div>
+                <div class="wizard-opt-desc">Toutes les photos et illustrations de la page (jpg, png, webp...)</div>
+              </div>
+              <div class="checkbox" style="margin-top:3px"></div>
+            </div>
+            <div class="wizard-opt">
+              <div class="wizard-opt-icon">📁</div>
+              <div class="wizard-opt-text">
+                <div class="wizard-opt-name">Documents (PDF, Word...)</div>
+                <div class="wizard-opt-desc">Fichiers liés en téléchargement depuis la page</div>
+              </div>
+              <div class="checkbox" style="margin-top:3px"></div>
+            </div>
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn-secondary">← Retour</button>
+          <button class="btn-primary">Suivant →</button>
+        </div>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="verdict-grid">
+        <div class="verdict-pro">✓ Descriptions complètes</div>
+        <div class="verdict-con">✗ 4 étapes pour scraper</div>
+        <div class="verdict-pro">✓ Moins intimidant</div>
+        <div class="verdict-con">✗ Lent pour les habitués</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION D -->
+  <div class="option recommended">
+    <div class="option-header">
+      <div class="option-letter">D</div>
+      <span class="option-title">Profils intelligents</span>
+      <span class="option-desc">★ Recommandé</span>
+    </div>
+    <div class="app-window">
+      <div class="sidebar">
+        <div class="sidebar-logo">⚡ OmniSnap</div>
+        <div class="sidebar-btn active">🔍 Nouveau scrape</div>
+        <div class="sidebar-btn disabled">🕐 Historique</div>
+        <div class="sidebar-btn disabled">⚙️ Paramètres</div>
+      </div>
+      <div class="main">
+        <div class="form-group">
+          <div class="form-label">URL</div>
+          <div class="form-input url">https://exemple.com/article</div>
+        </div>
+        <div class="section-title">Que souhaitez-vous faire ?</div>
+        <div class="profile-grid">
+          <div class="profile-card selected">
+            <span class="profile-icon">📄</span>
+            <div class="profile-name">Lire un article</div>
+            <div class="profile-desc">Sauvegarde le texte lisible de la page</div>
+          </div>
+          <div class="profile-card">
+            <span class="profile-icon">🎬</span>
+            <div class="profile-name">Télécharger des médias</div>
+            <div class="profile-desc">Vidéos, images ou audios de la page</div>
+          </div>
+          <div class="profile-card">
+            <span class="profile-icon">📦</span>
+            <div class="profile-name">Archiver une page</div>
+            <div class="profile-desc">Copie complète : HTML + images + CSS</div>
+          </div>
+          <div class="profile-card expert">
+            <span class="profile-icon">⚙️</span>
+            <div class="profile-name">Mode expert</div>
+            <div class="profile-desc">Tous les réglages manuellement</div>
+          </div>
+        </div>
+        <div class="profile-selected-config">
+          <div class="config-row"><span class="config-label">Profil</span><span class="config-value">📄 Lire un article</span><span class="config-change">Changer</span></div>
+          <div class="config-row"><span class="config-label">Profondeur</span><span class="config-value">Page seule (recommandé)</span><span class="config-change">Modifier</span></div>
+          <div class="config-row"><span class="config-label">Format</span><span class="config-value">Texte propre (.txt)</span><span class="config-change">Modifier</span></div>
+        </div>
+        <button class="launch-btn">▶ Lancer le scraping</button>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="verdict-grid">
+        <div class="verdict-pro">✓ Accessible aux débutants</div>
+        <div class="verdict-con">✗ Plus à implémenter</div>
+        <div class="verdict-pro">✓ Rapide pour les habitués</div>
+        <div class="verdict-con">✗ Profils à bien définir</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HYBRIDE A+D -->
+  <div class="option recommended">
+    <div class="option-header">
+      <div class="option-letter">E</div>
+      <span class="option-title">Hybride A + D</span>
+      <span class="option-desc">★ Alternative recommandée</span>
+    </div>
+    <div class="app-window">
+      <div class="sidebar">
+        <div class="sidebar-logo">⚡ OmniSnap</div>
+        <div class="sidebar-btn active">🔍 Nouveau scrape</div>
+        <div class="sidebar-btn disabled">🕐 Historique</div>
+        <div class="sidebar-btn disabled">⚙️ Paramètres</div>
+      </div>
+      <div class="main">
+        <div class="form-group">
+          <div class="form-label">URL à scraper</div>
+          <div class="form-input url">https://exemple.com/article</div>
+        </div>
+        <div class="section-title">Que voulez-vous récupérer ?</div>
+        <div class="mode-grid">
+          <div class="mode-item selected">
+            <div class="mode-item-top"><span class="mode-icon">📄</span><span class="mode-name">Texte propre</span><div class="checkbox checked">✓</div></div>
+            <div class="mode-desc">Contenu lisible sans le code — idéal pour lire un article hors ligne</div>
+          </div>
+          <div class="mode-item">
+            <div class="mode-item-top"><span class="mode-icon">🖼️</span><span class="mode-name">Images</span><div class="checkbox"></div></div>
+            <div class="mode-desc">Toutes les photos et illustrations (jpg, png, webp...)</div>
+          </div>
+          <div class="mode-item">
+            <div class="mode-item-top"><span class="mode-icon">🎬</span><span class="mode-name">Vidéos</span><div class="checkbox"></div></div>
+            <div class="mode-desc">Fichiers vidéo présents sur la page (mp4, webm, mov...)</div>
+          </div>
+          <div class="mode-item">
+            <div class="mode-item-top"><span class="mode-icon">🎵</span><span class="mode-name">Audios</span><div class="checkbox"></div></div>
+            <div class="mode-desc">Fichiers audio (mp3, wav, flac, aac...)</div>
+          </div>
+          <div class="mode-item">
+            <div class="mode-item-top"><span class="mode-icon">📁</span><span class="mode-name">Documents</span><div class="checkbox"></div></div>
+            <div class="mode-desc">PDF, Word, Excel, PowerPoint liés sur la page</div>
+          </div>
+          <div class="mode-item">
+            <div class="mode-item-top"><span class="mode-icon">📦</span><span class="mode-name">Archives</span><div class="checkbox"></div></div>
+            <div class="mode-desc">Fichiers zip, rar, 7z en téléchargement</div>
+          </div>
+        </div>
+        <div class="section-title">Profondeur — combien de pages suivre ?</div>
+        <div class="depth-row">
+          <div class="depth-btn active">
+            <div style="font-size:13px;font-weight:700">0</div>
+            <div style="font-size:9px;color:#888;margin-top:2px">Cette page seulement<br>(recommandé)</div>
+          </div>
+          <div class="depth-btn">
+            <div style="font-size:13px;font-weight:700">+1</div>
+            <div style="font-size:9px;color:#555;margin-top:2px">Page + liens directs</div>
+          </div>
+          <div class="depth-btn">
+            <div style="font-size:13px;font-weight:700">+2</div>
+            <div style="font-size:9px;color:#555;margin-top:2px">Liens des liens</div>
+          </div>
+          <div class="depth-btn" style="color:#555">
+            <div style="font-size:13px;font-weight:700">+3+</div>
+            <div style="font-size:9px;color:#555;margin-top:2px">Avancé</div>
+          </div>
+        </div>
+        <button class="launch-btn">▶ Lancer le scraping</button>
+      </div>
+    </div>
+    <div class="verdict">
+      <div class="verdict-grid">
+        <div class="verdict-pro">✓ Descriptions longues pour chaque mode</div>
+        <div class="verdict-con">✗ Pas de "profils" express</div>
+        <div class="verdict-pro">✓ Tout en 1 écran, pas de navigation</div>
+        <div class="verdict-con">✗ Scrollable si petite fenêtre</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;margin-top:24px;color:#555;font-size:12px">
+  OmniSnap Design Review · Palette : Nuit Électrique · Cyan #00B4D8
+</div>
+
+</body>
+</html>

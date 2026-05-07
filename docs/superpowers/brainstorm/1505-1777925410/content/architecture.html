@@ -1,0 +1,73 @@
+<h2>Architecture — Web Scraper Windows</h2>
+<p class="subtitle">Structure des fichiers et flux de données</p>
+
+<div class="section">
+  <div class="label">Structure du projet</div>
+  <div style="background:#181825;border-radius:8px;padding:16px;font-family:monospace;font-size:12px;color:#cdd6f4;line-height:2">
+    <div style="color:#89b4fa">scraper-app/</div>
+    <div style="padding-left:20px">
+      <div><span style="color:#f9e2af">main.py</span> <span style="color:#6c7086">← point d'entrée — lance l'app</span></div>
+      <div><span style="color:#89b4fa">gui/</span> <span style="color:#6c7086">← tout ce qui est interface</span></div>
+      <div style="padding-left:20px">
+        <div><span style="color:#f9e2af">app.py</span> <span style="color:#6c7086">← fenêtre principale CTk</span></div>
+        <div><span style="color:#f9e2af">sidebar.py</span> <span style="color:#6c7086">← navigation gauche</span></div>
+        <div><span style="color:#89b4fa">panels/</span></div>
+        <div style="padding-left:20px">
+          <div><span style="color:#f9e2af">scrape_panel.py</span> <span style="color:#6c7086">← formulaire URL + modes</span></div>
+          <div><span style="color:#f9e2af">log_panel.py</span> <span style="color:#6c7086">← log temps réel</span></div>
+          <div><span style="color:#f9e2af">preview_panel.py</span> <span style="color:#6c7086">← aperçu résultats</span></div>
+          <div><span style="color:#f9e2af">history_panel.py</span> <span style="color:#6c7086">← scrapes précédents</span></div>
+        </div>
+      </div>
+      <div><span style="color:#89b4fa">scraper_modules/</span> <span style="color:#a6e3a1">← TON CODE EXISTANT — inchangé ✓</span></div>
+      <div><span style="color:#89b4fa">build/</span></div>
+      <div style="padding-left:20px">
+        <div><span style="color:#f9e2af">scraper.spec</span> <span style="color:#6c7086">← config PyInstaller</span></div>
+        <div><span style="color:#f9e2af">installer.iss</span> <span style="color:#6c7086">← script Inno Setup</span></div>
+      </div>
+      <div><span style="color:#f9e2af">history.json</span> <span style="color:#6c7086">← historique local (AppData)</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Flux quand l'utilisateur lance un scrape</div>
+  <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-top:8px">
+    <div style="background:#313244;border-radius:6px;padding:10px 14px;font-size:12px;text-align:center">
+      <div style="color:#89b4fa">🖱 UI Thread</div>
+      <div style="color:#a6adc8;font-size:11px;margin-top:4px">Clic "Lancer"</div>
+    </div>
+    <div style="color:#6c7086;padding:0 8px;font-size:18px">→</div>
+    <div style="background:#313244;border-radius:6px;padding:10px 14px;font-size:12px;text-align:center">
+      <div style="color:#f9e2af">⚙ Worker Thread</div>
+      <div style="color:#a6adc8;font-size:11px;margin-top:4px">scraper_modules (ton code)</div>
+    </div>
+    <div style="color:#6c7086;padding:0 8px;font-size:18px">→</div>
+    <div style="background:#313244;border-radius:6px;padding:10px 14px;font-size:12px;text-align:center">
+      <div style="color:#a6e3a1">📬 Queue</div>
+      <div style="color:#a6adc8;font-size:11px;margin-top:4px">messages de log</div>
+    </div>
+    <div style="color:#6c7086;padding:0 8px;font-size:18px">→</div>
+    <div style="background:#313244;border-radius:6px;padding:10px 14px;font-size:12px;text-align:center">
+      <div style="color:#89b4fa">🖥 log_panel</div>
+      <div style="color:#a6adc8;font-size:11px;margin-top:4px">affiche en temps réel</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;background:rgba(137,180,250,0.08);border-left:3px solid #89b4fa;padding:10px 14px;font-size:12px;color:#a6adc8;border-radius:0 6px 6px 0">
+    ℹ Le scraping tourne dans un <strong style="color:#cdd6f4">thread séparé</strong> pour que l'interface reste réactive. Une <strong style="color:#cdd6f4">Queue Python</strong> (thread-safe) transmet les messages de log au panel sans risque de conflit.
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Packaging</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+    <div style="background:#313244;border-radius:6px;padding:12px;flex:1;min-width:160px">
+      <div style="color:#f9e2af;margin-bottom:6px">1. PyInstaller</div>
+      <div style="font-size:11px;color:#a6adc8;line-height:1.7">Crée un dossier <code style="background:#1e1e2e;padding:1px 4px;border-radius:3px">dist/scraper/</code> avec le .exe + toutes les dépendances Python bundlées</div>
+    </div>
+    <div style="background:#313244;border-radius:6px;padding:12px;flex:1;min-width:160px">
+      <div style="color:#a6e3a1;margin-bottom:6px">2. Inno Setup</div>
+      <div style="font-size:11px;color:#a6adc8;line-height:1.7">Prend le dossier dist/ et génère <code style="background:#1e1e2e;padding:1px 4px;border-radius:3px">Scraper_Setup.exe</code> — installateur avec raccourcis, menu Démarrer, désinstallation propre</div>
+    </div>
+  </div>
+</div>

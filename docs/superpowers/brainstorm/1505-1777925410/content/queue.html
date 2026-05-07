@@ -1,0 +1,101 @@
+<h2>File d'attente — Comment ça fonctionne ?</h2>
+<p class="subtitle">Deux approches pour gérer plusieurs scrapes en séquence</p>
+
+<div class="options">
+
+  <div class="option" data-choice="simple" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Simple — Ajouter à la file</h3>
+      <p>Un bouton <strong>"+ Ajouter à la file"</strong> à côté de "Lancer". Tu prépares plusieurs scrapes (URL + options différentes pour chacun) et ils s'exécutent un par un automatiquement.</p>
+
+      <div style="background:#181825;border-radius:8px;padding:12px;margin-top:10px;font-size:11px">
+        <div style="color:#6c7086;margin-bottom:8px;font-size:10px;letter-spacing:1px">FILE D'ATTENTE (3)</div>
+
+        <div style="background:#313244;border-radius:6px;padding:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="color:#89b4fa;display:flex;align-items:center;gap:6px"><span>⚡</span> uesp.net/wiki/Skyrim</div>
+            <div style="color:#6c7086;font-size:10px">Texte + JSON · profondeur 2 · En cours...</div>
+          </div>
+          <div style="background:#f38ba8;color:#1e1e2e;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">✕</div>
+        </div>
+
+        <div style="background:#1e1e2e;border-radius:6px;padding:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="color:#cdd6f4">fandom.com/wiki/Fallout</div>
+            <div style="color:#6c7086;font-size:10px">Images · profondeur 1 · En attente</div>
+          </div>
+          <div style="background:#313244;color:#6c7086;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">✕</div>
+        </div>
+
+        <div style="background:#1e1e2e;border-radius:6px;padding:8px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="color:#cdd6f4">github.com/user/repo</div>
+            <div style="color:#6c7086;font-size:10px">Complet · profondeur 0 · En attente</div>
+          </div>
+          <div style="background:#313244;color:#6c7086;border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer">✕</div>
+        </div>
+      </div>
+
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <div style="background:rgba(166,227,161,0.1);border:1px solid #a6e3a1;border-radius:4px;padding:4px 10px;font-size:11px;color:#a6e3a1">✅ Simple à comprendre</div>
+        <div style="background:rgba(166,227,161,0.1);border:1px solid #a6e3a1;border-radius:4px;padding:4px 10px;font-size:11px;color:#a6e3a1">✅ Supprimer un item</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="advanced" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Avancé — File réordonnable</h3>
+      <p>Même chose qu'option A, mais tu peux <strong>glisser-déposer</strong> pour changer l'ordre des scrapes dans la file avant qu'ils s'exécutent.</p>
+
+      <div style="background:#181825;border-radius:8px;padding:12px;margin-top:10px;font-size:11px">
+        <div style="color:#6c7086;margin-bottom:8px;font-size:10px;letter-spacing:1px">FILE D'ATTENTE (3) — drag pour réordonner</div>
+
+        <div style="background:#313244;border-radius:6px;padding:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="color:#6c7086;cursor:grab">⠿</span>
+            <div>
+              <div style="color:#89b4fa;display:flex;align-items:center;gap:6px"><span>⚡</span> uesp.net/wiki/Skyrim</div>
+              <div style="color:#6c7086;font-size:10px">En cours...</div>
+            </div>
+          </div>
+          <div style="background:#f38ba8;color:#1e1e2e;border-radius:4px;padding:3px 8px;font-size:10px">✕</div>
+        </div>
+
+        <div style="background:#1e1e2e;border-radius:6px;padding:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;border:1px dashed #6c7086">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="color:#6c7086;cursor:grab">⠿</span>
+            <div>
+              <div style="color:#cdd6f4">github.com/user/repo</div>
+              <div style="color:#6c7086;font-size:10px">Déplacé en 2e · En attente</div>
+            </div>
+          </div>
+          <div style="background:#313244;color:#6c7086;border-radius:4px;padding:3px 8px;font-size:10px">✕</div>
+        </div>
+
+        <div style="background:#1e1e2e;border-radius:6px;padding:8px;display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="color:#6c7086;cursor:grab">⠿</span>
+            <div>
+              <div style="color:#cdd6f4">fandom.com/wiki/Fallout</div>
+              <div style="color:#6c7086;font-size:10px">En attente</div>
+            </div>
+          </div>
+          <div style="background:#313244;color:#6c7086;border-radius:4px;padding:3px 8px;font-size:10px">✕</div>
+        </div>
+      </div>
+
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <div style="background:rgba(166,227,161,0.1);border:1px solid #a6e3a1;border-radius:4px;padding:4px 10px;font-size:11px;color:#a6e3a1">✅ Contrôle total</div>
+        <div style="background:rgba(243,139,168,0.1);border:1px solid #f38ba8;border-radius:4px;padding:4px 10px;font-size:11px;color:#f38ba8">⚠ Plus complexe à implémenter</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:16px;background:rgba(137,180,250,0.08);border-left:3px solid #89b4fa;padding:12px 16px;border-radius:0 6px 6px 0;font-size:12px;color:#a6adc8">
+  💡 Dans les deux cas : on peut <strong style="color:#cdd6f4">supprimer un item</strong> de la file, et la file d'attente s'affiche dans un panel visible pendant qu'un scrape tourne. Le scrape en cours est toujours mis en évidence (icône ⚡ + couleur différente).
+</div>

@@ -1,0 +1,86 @@
+<h2>Quel style d'interface tu imagines pour le scraper Windows ?</h2>
+<p class="subtitle">Choisis le style qui correspond le mieux à ta vision</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="minimal" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1e1e2e;border-radius:8px;padding:16px;font-family:monospace;font-size:12px;color:#cdd6f4">
+        <div style="display:flex;gap:6px;margin-bottom:12px">
+          <span style="width:10px;height:10px;border-radius:50%;background:#f38ba8;display:inline-block"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:#f9e2af;display:inline-block"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:#a6e3a1;display:inline-block"></span>
+        </div>
+        <div style="background:#313244;border-radius:4px;padding:8px;margin-bottom:8px;color:#89b4fa">🌐 URL(s) à scraper</div>
+        <input class="mock-input" placeholder="https://exemple.com" style="width:100%;margin-bottom:8px;box-sizing:border-box">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <div style="flex:1;background:#313244;border-radius:4px;padding:6px;font-size:11px;color:#a6e3a1">✓ Texte</div>
+          <div style="flex:1;background:#313244;border-radius:4px;padding:6px;font-size:11px;color:#cdd6f4">  HTML</div>
+          <div style="flex:1;background:#313244;border-radius:4px;padding:6px;font-size:11px;color:#cdd6f4">  Images</div>
+          <div style="flex:1;background:#313244;border-radius:4px;padding:6px;font-size:11px;color:#cdd6f4">  Vidéos</div>
+        </div>
+        <button class="mock-button" style="width:100%">🚀 Lancer le scraping</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Simple & direct</h3>
+      <p>Une petite fenêtre compacte. URL → options → go. Pas de fioriture. Idéal pour usage rapide.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="dashboard" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1e1e2e;border-radius:8px;padding:0;overflow:hidden;font-family:sans-serif;font-size:12px;color:#cdd6f4">
+        <div style="background:#181825;padding:8px 12px;display:flex;gap:6px;align-items:center">
+          <span style="width:10px;height:10px;border-radius:50%;background:#f38ba8;display:inline-block"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:#f9e2af;display:inline-block"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:#a6e3a1;display:inline-block"></span>
+          <span style="margin-left:8px;color:#6c7086;font-size:11px">Web Scraper — Tableau de bord</span>
+        </div>
+        <div style="display:flex;height:160px">
+          <div style="width:120px;background:#181825;padding:8px;display:flex;flex-direction:column;gap:4px">
+            <div style="background:#313244;border-radius:4px;padding:6px;color:#89b4fa;font-size:11px">▶ Nouveau</div>
+            <div style="padding:6px;color:#6c7086;font-size:11px">📋 Historique</div>
+            <div style="padding:6px;color:#6c7086;font-size:11px">⚙ Paramètres</div>
+            <div style="margin-top:auto;padding:6px;color:#6c7086;font-size:10px">3 tâches récentes</div>
+          </div>
+          <div style="flex:1;padding:10px">
+            <input class="mock-input" placeholder="https://exemple.com" style="width:100%;margin-bottom:8px;box-sizing:border-box;font-size:11px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px">
+              <div style="background:#313244;border-radius:4px;padding:5px;font-size:10px;color:#a6e3a1">✓ Texte</div>
+              <div style="background:#313244;border-radius:4px;padding:5px;font-size:10px">  HTML</div>
+              <div style="background:#313244;border-radius:4px;padding:5px;font-size:10px">  Images</div>
+              <div style="background:#313244;border-radius:4px;padding:5px;font-size:10px;color:#a6e3a1">✓ JSON</div>
+            </div>
+            <div style="background:#313244;border-radius:4px;padding:6px;font-size:10px;color:#6c7086;margin-bottom:6px">Profondeur crawl : ●●●○○ 3</div>
+            <button class="mock-button" style="width:100%;font-size:11px">🚀 Lancer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Dashboard complet</h3>
+      <p>Sidebar avec historique des scrapes, paramètres avancés, barre de progression. Application plus riche.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="terminal" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0d0d0d;border-radius:8px;padding:14px;font-family:monospace;font-size:11px;color:#00ff41;line-height:1.7">
+        <div style="color:#888;margin-bottom:6px">Web Scraper v1.0 — Interface graphique</div>
+        <div>🌐 URL : <span style="background:#1a1a1a;padding:2px 6px;border-radius:3px;color:#fff">https://uesp.net/wiki/Skyrim</span></div>
+        <div style="color:#f9e2af">📦 Type détecté : MediaWiki</div>
+        <div>📋 Modes : [1] Texte  [2] HTML  [<span style="background:#00ff41;color:#000;padding:0 3px">3</span>] Wikitext  [4] JSON</div>
+        <div style="color:#888">Choix : <span style="color:#fff">_</span></div>
+        <div style="margin-top:8px;background:#111;border-radius:4px;padding:6px;color:#6c7086">
+          ████████████░░░░  68% — Téléchargement en cours...
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Terminal stylisé</h3>
+      <p>Fenêtre qui ressemble à un terminal mais avec une vraie interface graphique. Garde le feel de l'outil CLI actuel.</p>
+    </div>
+  </div>
+
+</div>

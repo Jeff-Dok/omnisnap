@@ -1,0 +1,81 @@
+<h2>Qu'est-ce qui se passe après le scraping ?</h2>
+<p class="subtitle">Comment l'utilisateur voit les résultats dans l'app</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="folder" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1e1e2e;border-radius:8px;padding:14px;font-family:sans-serif;font-size:12px;color:#cdd6f4">
+        <div style="background:#313244;border-radius:6px;padding:10px;margin-bottom:8px">
+          <div style="color:#a6e3a1;margin-bottom:4px">✅ Scraping terminé !</div>
+          <div style="color:#6c7086;font-size:11px">uesp.net/wiki/Skyrim — 3 fichiers sauvegardés</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="mock-button" style="flex:1;font-size:11px">📂 Ouvrir le dossier</button>
+          <button class="mock-button" style="flex:1;font-size:11px;background:#313244">🔄 Nouveau scrape</button>
+        </div>
+        <div style="margin-top:10px;background:#181825;border-radius:4px;padding:8px;font-size:10px;color:#6c7086">
+          <div style="margin-bottom:3px">📄 Skyrim.txt — 42 KB</div>
+          <div style="margin-bottom:3px">🗂 Skyrim.json — 128 KB</div>
+          <div>🖼 images/ — 24 fichiers</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Notification + dossier</h3>
+      <p>Même comportement qu'aujourd'hui. Scraping terminé → ouvre le dossier automatiquement. Simple et familier.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="preview" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1e1e2e;border-radius:8px;overflow:hidden;font-family:sans-serif;font-size:11px;color:#cdd6f4">
+        <div style="background:#181825;padding:6px 12px;display:flex;gap:12px;border-bottom:1px solid #313244">
+          <span style="color:#89b4fa;border-bottom:2px solid #89b4fa;padding-bottom:4px">Aperçu</span>
+          <span style="color:#6c7086">Fichiers</span>
+          <span style="color:#6c7086">Historique</span>
+        </div>
+        <div style="display:flex;height:130px">
+          <div style="width:100px;background:#181825;padding:8px;border-right:1px solid #313244">
+            <div style="background:#313244;border-radius:3px;padding:4px;margin-bottom:3px;color:#a6e3a1;font-size:10px">📄 Texte</div>
+            <div style="padding:4px;color:#6c7086;font-size:10px">🗂 JSON</div>
+            <div style="padding:4px;color:#6c7086;font-size:10px">🖼 Images (24)</div>
+          </div>
+          <div style="flex:1;padding:8px;font-size:10px;color:#cdd6f4;overflow:hidden">
+            <div style="color:#89b4fa;margin-bottom:4px">Skyrim — The Elder Scrolls V</div>
+            <div style="color:#a6adc8;line-height:1.6">The Elder Scrolls V: Skyrim is an action role-playing game developed by Bethesda. Set 200 years after Oblivion...</div>
+            <div style="margin-top:6px;color:#6c7086">— 42 KB · scraped il y a 3 sec</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Aperçu intégré</h3>
+      <p>Les résultats s'affichent directement dans l'app. On peut parcourir le texte, voir les images, explorer le JSON avant de sauvegarder.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="live" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1e1e2e;border-radius:8px;padding:14px;font-family:monospace;font-size:11px;color:#cdd6f4">
+        <div style="color:#89b4fa;margin-bottom:8px">⚡ Scraping en cours...</div>
+        <div style="background:#181825;border-radius:4px;padding:8px;height:80px;overflow:hidden;line-height:1.8;font-size:10px">
+          <div style="color:#a6e3a1">[OK] Connexion établie — uesp.net</div>
+          <div style="color:#f9e2af">[~] Type détecté : MediaWiki</div>
+          <div style="color:#a6e3a1">[OK] Page principale récupérée</div>
+          <div style="color:#a6e3a1">[OK] Wikitext extrait — 38 KB</div>
+          <div style="color:#6c7086">[…] Téléchargement images (4/24)...</div>
+        </div>
+        <div style="margin-top:8px;background:#313244;border-radius:3px;height:6px">
+          <div style="background:#89b4fa;width:40%;height:100%;border-radius:3px"></div>
+        </div>
+        <div style="margin-top:4px;color:#6c7086;font-size:10px">40% — ~12 sec restants</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Log en temps réel</h3>
+      <p>On voit chaque étape défiler en direct avec une barre de progression. Idéal pour les crawls longs. Très pro.</p>
+    </div>
+  </div>
+
+</div>
