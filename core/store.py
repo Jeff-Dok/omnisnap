@@ -51,7 +51,8 @@ class AppStore:
     @staticmethod
     def _load_json(path: Path, default):
         try:
-            return json.loads(path.read_text(encoding="utf-8"))
+            value = json.loads(path.read_text(encoding="utf-8"))
+            return value if isinstance(value, type(default)) else default
         except Exception:
             return default
 

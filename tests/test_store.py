@@ -85,6 +85,6 @@ def test_invalid_history_json_fallback(tmp_path):
     assert AppStore(base_dir=tmp_path).get_history() == []
 
 
-def test_atomic_write_no_tmp_file(store, tmp_path):
+def test_atomic_write_no_tmp_file(store):
     store.save_settings({"theme": "light"})
-    assert not (tmp_path / "settings.tmp").exists()
+    assert not (store._dir / "settings.tmp").exists()
