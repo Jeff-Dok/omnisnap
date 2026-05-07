@@ -31,6 +31,8 @@ class ScraperRunner:
         self._crawl_fn = _crawl_fn  # injectable pour tests
 
     def start(self):
+        if self._thread is not None and self._thread.is_alive():
+            raise RuntimeError("ScraperRunner is already running")
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
 
@@ -44,10 +46,9 @@ class ScraperRunner:
         try:
             url_dest = self.dest_base / url_to_folder(self.url)
             session = requests.Session()
-            pw_cookies: list[dict] = []
 
             if self.cookies_path:
-                pw_cookies = self._load_cookies(session, self.cookies_path)
+                self._load_cookies(session, self.cookies_path)
 
             crawl_fn = self._crawl_fn or self._default_crawl
             crawl_fn(

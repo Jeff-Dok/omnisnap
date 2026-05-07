@@ -6,6 +6,17 @@ from pathlib import Path
 from core.runner import ScraperRunner
 
 
+def _drain(q):
+    """Safely drain all items from a queue."""
+    items = []
+    while not q.empty():
+        try:
+            items.append(q.get_nowait())
+        except queue.Empty:
+            break
+    return items
+
+
 def _fake_crawl_ok(**kwargs):
     kwargs['log']("✓ page test")
 
@@ -58,7 +69,8 @@ def test_runner_log_forwarded(tmp_path):
     runner.start()
     runner._thread.join(timeout=5)
 
-    messages = [m for m in list(q.queue) if isinstance(m, str)]
+    all_messages = _drain(q)
+    messages = [m for m in all_messages if isinstance(m, str)]
     assert any("page test" in m for m in messages)
 
 
@@ -78,7 +90,7 @@ def test_runner_cancel(tmp_path):
     runner._thread.join(timeout=3)
 
     assert not runner._thread.is_alive()
-    messages = list(q.queue)
+    messages = _drain(q)
     cancelled = any(isinstance(m, dict) and m.get("type") == "cancelled" for m in messages)
     assert cancelled
 
@@ -96,7 +108,7 @@ def test_runner_error(tmp_path):
     runner.start()
     runner._thread.join(timeout=5)
 
-    messages = list(q.queue)
+    messages = _drain(q)
     error = next((m for m in messages if isinstance(m, dict) and m.get("type") == "error"), None)
     assert error is not None
     assert "Erreur réseau" in error["message"]
