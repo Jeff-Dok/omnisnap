@@ -159,10 +159,10 @@ class ScrapeView(ctk.CTkFrame):
             text=f"{self._page_count} pages · {self._file_count} fichiers"
         )
         self._log_box.configure(state="normal")
+        start = self._log_box._textbox.index("end-1c")
         self._log_box.insert("end", line)
         tag_name = f"col_{color.replace('#', '')}"
         self._log_box._textbox.tag_configure(tag_name, foreground=color)
-        start = self._log_box._textbox.index(f"end-{len(line) + 1}c")
         self._log_box._textbox.tag_add(tag_name, start, "end-1c")
         self._log_box.configure(state="disabled")
         self._log_box.see("end")
@@ -170,13 +170,16 @@ class ScrapeView(ctk.CTkFrame):
     def _handle_control(self, msg: dict):
         if self._poll_job:
             self.after_cancel(self._poll_job)
+            self._poll_job = None
+        items = []
         try:
             while True:
-                remaining = self._log_queue.get_nowait()
-                if isinstance(remaining, str):
-                    self._append_log(remaining)
+                items.append(self._log_queue.get_nowait())
         except queue.Empty:
             pass
+        for item in items:
+            if isinstance(item, str):
+                self._append_log(item)
         t = msg.get("type")
         if t == "done":
             self._dest = msg.get("dest", "")
