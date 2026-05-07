@@ -437,7 +437,10 @@ def crawl(
     session_data: dict | None = None,
     sessions_dir: Path | None = None,
     log: callable | None = None,
+    cancel_event=None,          # ← nouveau
 ):
+    if cancel_event is not None and cancel_event.is_set():
+        return
     if url in visited or current_depth > depth:
         return
     visited.add(url)
@@ -609,7 +612,7 @@ def crawl(
                       respect_robots=respect_robots, _robots_cache=_robots_cache,
                       progress=progress, task_url=task_url,
                       session_data=session_data, sessions_dir=sessions_dir,
-                      log=log)
+                      log=log, cancel_event=cancel_event)
 
 
 # ── Crawl MediaWiki ───────────────────────────────────────────────────────────
