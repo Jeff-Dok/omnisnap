@@ -339,4 +339,9 @@ class Wizard(ctk.CTkFrame):
         for var in self._mode_vars.values():
             var.set(False)
         self._select_depth(0, DEPTH_LABELS[0][1])
+        self._cookies_entry.delete(0, "end")
+        if self._adv_visible:
+            self._adv_visible = False
+            self._adv_btn.configure(text="▸ Options avancées (optionnel)")
+            self._adv_frame.pack_forget()
         self._show_step(0)
