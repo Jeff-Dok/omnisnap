@@ -19,6 +19,7 @@ class ScrapeView(ctk.CTkFrame):
         self._log_queue: queue.Queue | None = None
         self._dest: str = ""
         self._poll_job = None
+        self._cancel_fn = None
         self._build()
 
     # ── Construction ──────────────────────────────────────────────────────────
@@ -164,8 +165,8 @@ class ScrapeView(ctk.CTkFrame):
         tag_name = f"col_{color.replace('#', '')}"
         self._log_box._textbox.tag_configure(tag_name, foreground=color)
         self._log_box._textbox.tag_add(tag_name, start, "end-1c")
-        self._log_box.configure(state="disabled")
         self._log_box.see("end")
+        self._log_box.configure(state="disabled")
 
     def _handle_control(self, msg: dict):
         if self._poll_job:
@@ -180,6 +181,8 @@ class ScrapeView(ctk.CTkFrame):
         for item in items:
             if isinstance(item, str):
                 self._append_log(item)
+            elif isinstance(item, dict) and item.get("type") in ("done", "cancelled", "error"):
+                msg = item
         t = msg.get("type")
         if t == "done":
             self._dest = msg.get("dest", "")
