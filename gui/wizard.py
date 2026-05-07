@@ -279,13 +279,13 @@ class Wizard(ctk.CTkFrame):
                       text_color=T.TEXT, font=T.FONT_SMALL, height=32,
                       command=self._browse_cookies).pack(side="right")
 
-        nav = ctk.CTkFrame(f, fg_color="transparent")
-        nav.pack(fill="x", side="bottom", pady=(12, 0))
-        ctk.CTkButton(nav, text="← Retour", font=T.FONT_NORMAL,
+        self._nav_step3 = ctk.CTkFrame(f, fg_color="transparent")
+        self._nav_step3.pack(fill="x", side="bottom", pady=(12, 0))
+        ctk.CTkButton(self._nav_step3, text="← Retour", font=T.FONT_NORMAL,
                       fg_color=T.BG_SURFACE, hover_color=T.BORDER,
                       text_color=T.TEXT_DIM, height=36,
                       command=self._prev).pack(side="left")
-        ctk.CTkButton(nav, text="▶ Lancer le scraping", font=T.FONT_BOLD,
+        ctk.CTkButton(self._nav_step3, text="▶ Lancer le scraping", font=T.FONT_BOLD,
                       fg_color=T.ACCENT, hover_color=T.ACCENT_HOVER,
                       text_color=T.LOG_BG, height=36,
                       command=self._launch).pack(side="right")
@@ -297,7 +297,7 @@ class Wizard(ctk.CTkFrame):
                   else "▸ Options avancées (optionnel)")
         )
         if self._adv_visible:
-            self._adv_frame.pack(fill="x", pady=(0, 8))
+            self._adv_frame.pack(fill="x", pady=(0, 8), before=self._nav_step3)
         else:
             self._adv_frame.pack_forget()
 
@@ -307,7 +307,6 @@ class Wizard(ctk.CTkFrame):
             filetypes=[("Cookies Netscape", "*.txt"), ("Tous", "*.*")],
         )
         if path:
-            self._cookies_path = path
             self._cookies_entry.delete(0, "end")
             self._cookies_entry.insert(0, path)
 
