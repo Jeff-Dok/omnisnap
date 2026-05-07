@@ -20,6 +20,8 @@ class ScrapeView(ctk.CTkFrame):
         self._dest: str = ""
         self._poll_job = None
         self._cancel_fn = None
+        self._page_count = 0
+        self._file_count = 0
         self._build()
 
     # ── Construction ──────────────────────────────────────────────────────────
@@ -88,6 +90,9 @@ class ScrapeView(ctk.CTkFrame):
     def start(self, url: str, modes: list[int], depth: int, log_queue: queue.Queue,
               runner_cancel_fn):
         from gui.wizard import MODES
+        if self._poll_job:
+            self.after_cancel(self._poll_job)
+            self._poll_job = None
         self._log_queue = log_queue
         self._cancel_fn = runner_cancel_fn
 
