@@ -13,15 +13,19 @@ from gui import theme as T
 class ScrapeView(ctk.CTkFrame):
     """Vue split : résumé en haut + log en bas. Gère les états en cours / terminé / erreur."""
 
-    def __init__(self, master, on_new_scrape, **kwargs):
+    def __init__(self, master, on_new_scrape, on_done=None, **kwargs):
         super().__init__(master, fg_color=T.BG_MAIN, corner_radius=0, **kwargs)
         self._on_new_scrape = on_new_scrape
+        self._on_done = on_done
         self._log_queue: queue.Queue | None = None
         self._dest: str = ""
         self._poll_job = None
         self._cancel_fn = None
         self._page_count = 0
         self._file_count = 0
+        self._url: str = ""
+        self._modes: list = []
+        self._depth: int = 0
         self._build()
 
     # ── Construction ──────────────────────────────────────────────────────────
@@ -95,6 +99,9 @@ class ScrapeView(ctk.CTkFrame):
             self._poll_job = None
         self._log_queue = log_queue
         self._cancel_fn = runner_cancel_fn
+        self._url = url
+        self._modes = modes
+        self._depth = depth
 
         self._log_box.configure(state="normal")
         self._log_box.delete("1.0", "end")
@@ -192,13 +199,35 @@ class ScrapeView(ctk.CTkFrame):
         if t == "done":
             self._dest = msg.get("dest", "")
             files = msg.get("files", 0)
-            size_mb = msg.get("size_bytes", 0) / (1024 * 1024)
-            summary = f"{self._page_count} pages · {files} fichiers · {size_mb:.1f} MB"
-            self._set_done(summary)
+            size_bytes = msg.get("size_bytes", 0)
+            pages = msg.get("pages", self._page_count)
+            size_mb = round(size_bytes / 1_048_576, 1)
+            self._set_done(f"{pages} pages · {files} fichiers · {size_mb:.1f} MB")
+            if self._on_done:
+                self._on_done({
+                    "url": self._url, "modes": self._modes, "depth": self._depth,
+                    "status": "done", "pages": pages, "file_count": files,
+                    "size_mb": size_mb, "dest_path": self._dest, "error_msg": None,
+                })
         elif t == "cancelled":
             self._set_error("Scraping annulé.")
+            if self._on_done:
+                self._on_done({
+                    "url": self._url, "modes": self._modes, "depth": self._depth,
+                    "status": "cancelled", "pages": self._page_count,
+                    "file_count": self._file_count, "size_mb": 0.0,
+                    "dest_path": self._dest, "error_msg": None,
+                })
         elif t == "error":
-            self._set_error(msg.get("message", "Erreur inconnue"))
+            error_msg = msg.get("message", "Erreur inconnue")
+            self._set_error(error_msg)
+            if self._on_done:
+                self._on_done({
+                    "url": self._url, "modes": self._modes, "depth": self._depth,
+                    "status": "error", "pages": self._page_count,
+                    "file_count": self._file_count, "size_mb": 0.0,
+                    "dest_path": self._dest, "error_msg": error_msg,
+                })
 
     # ── États finaux ──────────────────────────────────────────────────────────
 
