@@ -94,7 +94,9 @@ class ScrapeView(ctk.CTkFrame):
         self._log_box.delete("1.0", "end")
         self._log_box.configure(state="disabled")
         self._btn_new.pack_forget()
-        self._lbl_url.configure(text=url)
+        MAX_URL = 60
+        display_url = url if len(url) <= MAX_URL else url[:MAX_URL] + "…"
+        self._lbl_url.configure(text=display_url)
         self._lbl_status.configure(text="● En cours", text_color=T.WARNING)
         self._lbl_counter.configure(text="")
         self._btn_action.configure(text="⏹ Annuler", fg_color="#c0392b",
@@ -158,12 +160,23 @@ class ScrapeView(ctk.CTkFrame):
         )
         self._log_box.configure(state="normal")
         self._log_box.insert("end", line)
+        tag_name = f"col_{color.replace('#', '')}"
+        self._log_box._textbox.tag_configure(tag_name, foreground=color)
+        start = self._log_box._textbox.index(f"end-{len(line) + 1}c")
+        self._log_box._textbox.tag_add(tag_name, start, "end-1c")
         self._log_box.configure(state="disabled")
         self._log_box.see("end")
 
     def _handle_control(self, msg: dict):
         if self._poll_job:
             self.after_cancel(self._poll_job)
+        try:
+            while True:
+                remaining = self._log_queue.get_nowait()
+                if isinstance(remaining, str):
+                    self._append_log(remaining)
+        except queue.Empty:
+            pass
         t = msg.get("type")
         if t == "done":
             self._dest = msg.get("dest", "")
