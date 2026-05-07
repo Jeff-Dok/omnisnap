@@ -24,7 +24,7 @@ class Sidebar(ctk.CTkFrame):
             self, text="🔍 Nouveau scrape",
             font=T.FONT_SMALL, anchor="w", height=34,
             fg_color=T.ACCENT, hover_color=T.ACCENT_HOVER,
-            text_color="#0a0a1a", corner_radius=6,
+            text_color=T.LOG_BG, corner_radius=6,
             command=self._on_new_scrape,
         )
         self._btn_scrape.pack(fill="x", padx=8, pady=2)
@@ -47,10 +47,16 @@ class Sidebar(ctk.CTkFrame):
         )
         self._btn_settings.pack(fill="x", padx=8, pady=2)
 
+        ctk.CTkLabel(
+            self, text="Disponible en Phase 2",
+            font=T.FONT_SMALL, text_color=T.TEXT_DIM,
+            anchor="center",
+        ).pack(fill="x", padx=8, pady=(0, 4))
+
     def set_active(self, view_name: str):
         """Mettre en surbrillance le bouton correspondant à la vue active."""
         is_scrape = view_name == "scrape"
         self._btn_scrape.configure(
             fg_color=T.ACCENT if is_scrape else "transparent",
-            text_color="#0a0a1a" if is_scrape else T.TEXT_DIM,
+            text_color=T.LOG_BG if is_scrape else T.TEXT_DIM,
         )
