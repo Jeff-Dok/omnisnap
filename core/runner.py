@@ -50,6 +50,7 @@ class ScraperRunner:
             if self.cookies_path:
                 self._load_cookies(session, self.cookies_path)
 
+            visited: set = set()
             crawl_fn = self._crawl_fn or self._default_crawl
             crawl_fn(
                 url=self.url,
@@ -57,7 +58,7 @@ class ScraperRunner:
                 dest=url_dest,
                 depth=self.depth,
                 session=session,
-                visited=set(),
+                visited=visited,
                 log=self._log,
                 cancel_event=self._cancel_event,
             )
@@ -72,6 +73,7 @@ class ScraperRunner:
                 "dest": str(url_dest),
                 "files": files,
                 "size_bytes": size_bytes,
+                "pages": len(visited),
             })
 
         except Exception as exc:
