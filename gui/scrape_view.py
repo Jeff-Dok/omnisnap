@@ -13,10 +13,11 @@ from gui import theme as T
 class ScrapeView(ctk.CTkFrame):
     """Vue split : résumé en haut + log en bas. Gère les états en cours / terminé / erreur."""
 
-    def __init__(self, master, on_new_scrape, on_done=None, **kwargs):
+    def __init__(self, master, on_new_scrape, on_done=None, on_add_task=None, **kwargs):
         super().__init__(master, fg_color=T.BG_MAIN, corner_radius=0, **kwargs)
         self._on_new_scrape = on_new_scrape
         self._on_done = on_done
+        self._on_add_task = on_add_task
         self._log_queue: queue.Queue | None = None
         self._dest: str = ""
         self._poll_job = None
@@ -54,6 +55,16 @@ class ScrapeView(ctk.CTkFrame):
             command=self._cancel,
         )
         self._btn_action.pack(side="right")
+
+        self._btn_add = ctk.CTkButton(
+            row1, text="➕ Ajouter une tâche", width=130, height=30,
+            font=T.FONT_SMALL, corner_radius=5,
+            fg_color="#14532d", hover_color="#166534",
+            border_color="#16a34a", border_width=1,
+            text_color="#86efac",
+            command=self._add_task,
+        )
+        self._btn_add.pack(side="right", padx=(0, 8))
 
         self._modes_row = ctk.CTkFrame(top_inner, fg_color="transparent")
         self._modes_row.pack(fill="x", pady=(4, 0))
@@ -107,6 +118,8 @@ class ScrapeView(ctk.CTkFrame):
         self._log_box.delete("1.0", "end")
         self._log_box.configure(state="disabled")
         self._btn_new.pack_forget()
+        if not self._btn_add.winfo_ismapped():
+            self._btn_add.pack(side="right", padx=(0, 8))
         MAX_URL = 60
         display_url = url if len(url) <= MAX_URL else url[:MAX_URL] + "…"
         self._lbl_url.configure(text=display_url)
@@ -237,6 +250,7 @@ class ScrapeView(ctk.CTkFrame):
         self._progress.set(1.0)
         self._lbl_status.configure(text="✅ Terminé", text_color=T.SUCCESS)
         self._lbl_counter.configure(text=summary)
+        self._btn_add.pack_forget()
         self._btn_action.configure(
             text="📂 Ouvrir le dossier", fg_color=T.SUCCESS,
             hover_color="#388e3c", command=self._open_folder,
@@ -249,6 +263,7 @@ class ScrapeView(ctk.CTkFrame):
         self._progress.set(1.0)
         self._lbl_status.configure(text="✗ Erreur", text_color=T.ERROR)
         self._lbl_counter.configure(text=message)
+        self._btn_add.pack_forget()
         self._btn_action.configure(
             text="↩ Réessayer", fg_color=T.BG_SURFACE,
             hover_color=T.BORDER, text_color=T.TEXT_DIM,
@@ -257,6 +272,10 @@ class ScrapeView(ctk.CTkFrame):
         self._btn_new.pack(anchor="e", pady=(6, 8))
 
     # ── Actions ───────────────────────────────────────────────────────────────
+
+    def _add_task(self):
+        if self._on_add_task:
+            self._on_add_task()
 
     def _cancel(self):
         if hasattr(self, "_cancel_fn") and self._cancel_fn:
