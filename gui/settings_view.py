@@ -80,6 +80,24 @@ class SettingsView(ctk.CTkFrame):
             command=self._on_auto_toggle,
         )
         self._switch_auto.pack(side="right", padx=(16, 0))
+
+        notif_row = ctk.CTkFrame(body, fg_color="transparent")
+        notif_row.pack(fill="x", pady=(0, 16))
+        notif_info = ctk.CTkFrame(notif_row, fg_color="transparent")
+        notif_info.pack(side="left", fill="x", expand=True)
+        ctk.CTkLabel(notif_info, text="Notifications Windows",
+                     font=T.FONT_NORMAL, text_color=T.TEXT, anchor="w").pack(fill="x")
+        ctk.CTkLabel(
+            notif_info,
+            text="Avertissement en bas à droite de l'écran quand un scraping se termine",
+            font=T.FONT_SMALL, text_color=T.TEXT_DIM, anchor="w",
+        ).pack(fill="x")
+        self._switch_notif = ctk.CTkSwitch(
+            notif_row, text="",
+            fg_color=T.BORDER, progress_color=T.ACCENT,
+            command=self._on_notif_toggle,
+        )
+        self._switch_notif.pack(side="right", padx=(16, 0))
         self._div(body)
 
         # À propos
@@ -115,6 +133,10 @@ class SettingsView(ctk.CTkFrame):
             self._switch_auto.select()
         else:
             self._switch_auto.deselect()
+        if settings.get("notifications", True):
+            self._switch_notif.select()
+        else:
+            self._switch_notif.deselect()
 
     def _on_theme_seg(self, value: str) -> None:
         name_map = {"🌙 Sombre": "dark", "☀️ Clair": "light", "💻 Système": "system"}
@@ -133,3 +155,6 @@ class SettingsView(ctk.CTkFrame):
 
     def _on_auto_toggle(self) -> None:
         self._store.save_settings({"auto_open": bool(self._switch_auto.get())})
+
+    def _on_notif_toggle(self) -> None:
+        self._store.save_settings({"notifications": bool(self._switch_notif.get())})
