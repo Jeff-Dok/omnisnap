@@ -248,7 +248,7 @@ class Wizard(ctk.CTkFrame):
                                           text_color=T.TEXT_DIM, anchor="w", padx=12, pady=4)
         self._recap_modes.pack(fill="x")
         self._recap_depth = ctk.CTkLabel(recap, text="", font=T.FONT_SMALL,
-                                          text_color=T.TEXT_DIM, anchor="w", padx=12, pady=(4, 8))
+                                          text_color=T.TEXT_DIM, anchor="w", padx=12, pady=6)
         self._recap_depth.pack(fill="x")
 
         self._adv_visible = False
