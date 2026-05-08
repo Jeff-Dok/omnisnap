@@ -19,7 +19,7 @@ FONT_BOLD   = ("Segoe UI", 12, "bold")
 FONT_TITLE  = ("Segoe UI", 14, "bold")
 FONT_LOG    = ("Consolas", 10)
 
-VERSION = "2.0.0"
+VERSION = "3.0.0"
 
 _THEME_MAP = {"dark": "Dark", "light": "Light", "system": "System"}
 
