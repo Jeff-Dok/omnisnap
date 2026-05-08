@@ -2,8 +2,10 @@
 import customtkinter as ctk
 
 from core.queue import QueuedTask
+from gui.wizard import MODES
 
-MODE_ICONS = {0: "📁", 1: "🖼", 2: "🎬", 3: "🎵"}
+# Build modes dict: mode_id -> (icon, name)
+_MODES_DICT = {mode[0]: (mode[1], mode[2]) for mode in MODES}
 
 
 class QueueView(ctk.CTkFrame):
@@ -66,8 +68,8 @@ class QueueView(ctk.CTkFrame):
         for child in self._scroll.winfo_children():
             child.destroy()
 
-        for task in tasks:
-            self._build_task_row(task)
+        for position, task in enumerate(tasks, start=1):
+            self._build_task_row(task, position)
 
         # Bouton "➕ Ajouter une autre URL" en bas de liste
         ctk.CTkButton(
@@ -79,7 +81,7 @@ class QueueView(ctk.CTkFrame):
             command=self._on_add,
         ).pack(fill="x", pady=(4, 0))
 
-    def _build_task_row(self, task: QueuedTask) -> None:
+    def _build_task_row(self, task: QueuedTask, position: int) -> None:
         card = ctk.CTkFrame(self._scroll, fg_color="#1e293b",
                             border_color="#334155", border_width=1, corner_radius=6)
         card.pack(fill="x", pady=(0, 4))
@@ -111,16 +113,55 @@ class QueueView(ctk.CTkFrame):
         text_block = ctk.CTkFrame(inner, fg_color="transparent")
         text_block.pack(side="left", fill="x", expand=True)
 
+        # Numéro de position (discret)
+        ctk.CTkLabel(
+            text_block, text=f"#{position}",
+            font=("Segoe UI", 9), text_color="#475569",
+            anchor="w",
+        ).pack(anchor="w")
+
         ctk.CTkLabel(
             text_block, text=task.url,
             font=("Segoe UI", 12), text_color="#e2e8f0",
             anchor="w", wraplength=0,
         ).pack(anchor="w", fill="x")
 
-        mode_str = " · ".join(MODE_ICONS[m] for m in task.modes if m in MODE_ICONS)
-        detail = f"{mode_str} · profondeur: {task.depth}"
+        # Construire la liste des modes avec noms en clair
+        modes_names = []
+        for mode_id in sorted(task.modes):
+            if mode_id in _MODES_DICT:
+                icon, name = _MODES_DICT[mode_id]
+                modes_names.append(f"{icon} {name}")
+
+        # Tronquer si plus de 3 modes
+        if len(modes_names) > 3:
+            modes_str = " · ".join(modes_names[:3]) + " · ..."
+        else:
+            modes_str = " · ".join(modes_names)
+
+        detail = f"{modes_str} · profondeur: {task.depth}"
         ctk.CTkLabel(
             text_block, text=detail,
             font=("Segoe UI", 10), text_color="#64748b",
             anchor="w",
         ).pack(anchor="w")
+
+        # Badges indicateurs
+        if task.url_filter or task.respect_robots:
+            badges_row = ctk.CTkFrame(text_block, fg_color="transparent")
+            badges_row.pack(anchor="w", pady=(2, 0))
+
+            if task.url_filter:
+                url_filter_display = task.url_filter[:20]
+                ctk.CTkLabel(
+                    badges_row, text=f"🔍 {url_filter_display}",
+                    font=("Segoe UI", 10), text_color="#94a3b8",
+                    fg_color="#334155", corner_radius=4,
+                ).pack(side="left", padx=(2, 4), pady=2)
+
+            if task.respect_robots:
+                ctk.CTkLabel(
+                    badges_row, text="🤖 robots.txt",
+                    font=("Segoe UI", 10), text_color="#94a3b8",
+                    fg_color="#334155", corner_radius=4,
+                ).pack(side="left", padx=(2, 0), pady=2)
