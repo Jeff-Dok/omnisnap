@@ -23,6 +23,10 @@ def test_settings_defaults(store):
     assert s["auto_open"] is False
 
 
+def test_settings_defaults_notifications(store):
+    assert store.get_settings()["notifications"] is True
+
+
 def test_save_and_get_settings(store):
     store.save_settings({"theme": "light"})
     assert store.get_settings()["theme"] == "light"

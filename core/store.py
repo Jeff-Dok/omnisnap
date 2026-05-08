@@ -5,7 +5,7 @@ from pathlib import Path
 
 _DEFAULT_DIR = Path(os.environ.get("APPDATA", Path.home())) / "OmniSnap"
 _MAX_HISTORY = 30
-_DEFAULT_SETTINGS: dict = {"theme": "dark", "dest_dir": "", "auto_open": False}
+_DEFAULT_SETTINGS: dict = {"theme": "dark", "dest_dir": "", "auto_open": False, "notifications": True}
 
 
 class AppStore:
