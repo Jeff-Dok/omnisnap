@@ -9,6 +9,15 @@ class QueuedTask:
     modes: list[int]
     depth: int
     cookies_path: str | None
+    respect_robots: bool = False
+    url_filter: str = ""
+    use_playwright: bool = False
+    playwright_opts: dict = field(default_factory=dict)
+    img_ext_filter: set | None = None
+    vid_ext_filter: set | None = None
+    aud_ext_filter: set | None = None
+    doc_ext_filter: set | None = None
+    arc_ext_filter: set | None = None
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
 
 

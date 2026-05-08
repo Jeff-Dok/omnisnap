@@ -18,6 +18,15 @@ class ScraperRunner:
         log_queue: queue.Queue,
         dest_base: Path | None = None,
         cookies_path: str | None = None,
+        respect_robots: bool = False,
+        url_filter: str = "",
+        use_playwright: bool = False,
+        playwright_opts: dict | None = None,
+        img_ext_filter: set | None = None,
+        vid_ext_filter: set | None = None,
+        aud_ext_filter: set | None = None,
+        doc_ext_filter: set | None = None,
+        arc_ext_filter: set | None = None,
         _crawl_fn=None,
     ):
         self.url = url
@@ -26,6 +35,15 @@ class ScraperRunner:
         self.log_queue = log_queue
         self.dest_base = Path(dest_base) if dest_base else DEFAULT_DEST
         self.cookies_path = cookies_path
+        self.respect_robots = respect_robots
+        self.url_filter = url_filter
+        self.use_playwright = use_playwright
+        self.playwright_opts = playwright_opts or {}
+        self.img_ext_filter = img_ext_filter
+        self.vid_ext_filter = vid_ext_filter
+        self.aud_ext_filter = aud_ext_filter
+        self.doc_ext_filter = doc_ext_filter
+        self.arc_ext_filter = arc_ext_filter
         self._cancel_event = threading.Event()
         self._thread: threading.Thread | None = None
         self._crawl_fn = _crawl_fn  # injectable pour tests
@@ -61,6 +79,15 @@ class ScraperRunner:
                 visited=visited,
                 log=self._log,
                 cancel_event=self._cancel_event,
+                respect_robots=self.respect_robots,
+                url_filter=self.url_filter,
+                use_playwright=self.use_playwright,
+                playwright_opts=self.playwright_opts,
+                img_ext_filter=self.img_ext_filter,
+                vid_ext_filter=self.vid_ext_filter,
+                aud_ext_filter=self.aud_ext_filter,
+                doc_ext_filter=self.doc_ext_filter,
+                arc_ext_filter=self.arc_ext_filter,
             )
 
             if self._cancel_event.is_set():

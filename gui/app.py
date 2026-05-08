@@ -128,16 +128,30 @@ class App(ctk.CTk):
         self._sidebar.update_badge(self._queue.count(), show_see_list=show_see_list)
 
     def _enqueue(self, url: str, modes: list, depth: int, cookies_path: str | None,
-                 respect_robots: bool = False, url_filter: str = ""):
-        task = QueuedTask(url=url, modes=modes, depth=depth, cookies_path=cookies_path,
-                          respect_robots=respect_robots, url_filter=url_filter)
+                 respect_robots: bool = False, url_filter: str = "",
+                 use_playwright: bool = False, playwright_opts: dict | None = None,
+                 img_ext_filter: set | None = None, vid_ext_filter: set | None = None,
+                 aud_ext_filter: set | None = None, doc_ext_filter: set | None = None,
+                 arc_ext_filter: set | None = None):
+        task = QueuedTask(
+            url=url, modes=modes, depth=depth, cookies_path=cookies_path,
+            respect_robots=respect_robots, url_filter=url_filter,
+            use_playwright=use_playwright, playwright_opts=playwright_opts or {},
+            img_ext_filter=img_ext_filter, vid_ext_filter=vid_ext_filter,
+            aud_ext_filter=aud_ext_filter, doc_ext_filter=doc_ext_filter,
+            arc_ext_filter=arc_ext_filter,
+        )
         self._queue.add(task)
         self._show_scrape_view()
 
     def _launch_queued(self, task: QueuedTask) -> None:
         self._launch(url=task.url, modes=task.modes, depth=task.depth,
                      cookies_path=task.cookies_path, respect_robots=task.respect_robots,
-                     url_filter=task.url_filter)
+                     url_filter=task.url_filter, use_playwright=task.use_playwright,
+                     playwright_opts=task.playwright_opts,
+                     img_ext_filter=task.img_ext_filter, vid_ext_filter=task.vid_ext_filter,
+                     aud_ext_filter=task.aud_ext_filter, doc_ext_filter=task.doc_ext_filter,
+                     arc_ext_filter=task.arc_ext_filter)
 
     def _on_queue_remove(self, task_id: str) -> None:
         self._queue.remove(task_id)
@@ -159,7 +173,11 @@ class App(ctk.CTk):
         self._show_scrape_view()
 
     def _launch(self, url: str, modes: list, depth: int, cookies_path: str | None,
-                respect_robots: bool = False, url_filter: str = ""):
+                respect_robots: bool = False, url_filter: str = "",
+                use_playwright: bool = False, playwright_opts: dict | None = None,
+                img_ext_filter: set | None = None, vid_ext_filter: set | None = None,
+                aud_ext_filter: set | None = None, doc_ext_filter: set | None = None,
+                arc_ext_filter: set | None = None):
         self._last_url = url
         self._store.save_settings({"last_url": url})
         dest_dir = self._store.get_settings().get("dest_dir", "")
@@ -171,6 +189,13 @@ class App(ctk.CTk):
             cookies_path=cookies_path,
             respect_robots=respect_robots,
             url_filter=url_filter,
+            use_playwright=use_playwright,
+            playwright_opts=playwright_opts,
+            img_ext_filter=img_ext_filter,
+            vid_ext_filter=vid_ext_filter,
+            aud_ext_filter=aud_ext_filter,
+            doc_ext_filter=doc_ext_filter,
+            arc_ext_filter=arc_ext_filter,
         )
         self._show_scrape_view()
         self._scrape_view.start(url=url, modes=modes, depth=depth,
