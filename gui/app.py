@@ -117,9 +117,10 @@ class App(ctk.CTk):
             "error_msg": result.get("error_msg"),
         }
         self._store.add_entry(entry)
-        if self._store.get_settings().get("notifications", True):
+        settings = self._store.get_settings()
+        if settings.get("notifications", True) and result["status"] in ("done", "error"):
             notify(result["status"], result["url"], result)
-        if result["status"] == "done" and self._store.get_settings().get("auto_open"):
+        if result["status"] == "done" and settings.get("auto_open"):
             dest = entry["dest_path"]
             if dest:
                 try:
