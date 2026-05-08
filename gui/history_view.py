@@ -199,20 +199,19 @@ class HistoryView(ctk.CTkFrame):
         for text, cmd, style in [
             ("🗑 Supprimer", self._delete_selected,
              {"fg_color": "transparent", "text_color": T.TEXT_DIM,
-              "border_width": 1, "border_color": T.BORDER}),
+              "border_width": 1, "border_color": T.BORDER, "hover_color": T.BORDER}),
             ("📂 Ouvrir le dossier", self._open_folder,
              {"fg_color": "transparent", "text_color": T.TEXT_DIM,
-              "border_width": 1, "border_color": T.BORDER}),
+              "border_width": 1, "border_color": T.BORDER, "hover_color": T.BORDER}),
             ("✏️ Modifier et relancer", self._relaunch_wizard,
              {"fg_color": "transparent", "text_color": T.TEXT,
-              "border_width": 1, "border_color": T.BORDER}),
+              "border_width": 1, "border_color": T.BORDER, "hover_color": T.BORDER}),
             ("▶ Relancer directement", self._relaunch_direct,
              {"fg_color": T.ACCENT, "text_color": T.LOG_BG,
               "hover_color": T.ACCENT_HOVER}),
         ]:
             ctk.CTkButton(btns, text=text, font=T.FONT_SMALL, height=28,
-                          corner_radius=5, hover_color=T.BORDER,
-                          command=cmd, **style).pack(side="left", padx=(0, 6))
+                          corner_radius=5, command=cmd, **style).pack(side="left", padx=(0, 6))
 
     def refresh(self) -> None:
         for w in self._list.winfo_children():
