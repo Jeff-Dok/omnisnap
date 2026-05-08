@@ -2,7 +2,7 @@
 
 ## Objectif
 
-Créer un installateur Windows professionnel pour OmniSnap via Inno Setup. L'installateur embarque l'exe PyInstaller, une icône multi-tailles, des métadonnées de version Windows, et présente un wizard complet bilingue (English / Français).
+Créer un installateur Windows professionnel pour OmniSnap via Inno Setup. L'installateur embarque l'exe PyInstaller, une icône multi-tailles, des métadonnées de version Windows, et présente un wizard complet bilingue (English / Français). Il installe aussi automatiquement Playwright Chromium (téléchargé pendant l'installation) et embarque yt-dlp pour les fonctionnalités optionnelles.
 
 ---
 
@@ -23,7 +23,7 @@ Créer un installateur Windows professionnel pour OmniSnap via Inno Setup. L'ins
 | Fichier | Changement |
 |---|---|
 | `gui/theme.py` | `VERSION = "3.0.0"` |
-| `build/OmniSnap.spec` | Ajout `icon='../assets/omnisnap.ico'` et `version='version_info.txt'` dans `EXE()` |
+| `build/OmniSnap.spec` | Ajout `icon`, `version`, et `'yt_dlp'` dans `hiddenimports` dans `EXE()` |
 
 ### Sortie de build
 
@@ -133,12 +133,40 @@ Name: "{commondesktop}\OmniSnap"; Filename: "{app}\OmniSnap.exe"; Tasks: desktop
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 ```
 
-### Lancement à la fin
+### Installation de Playwright Chromium
+
+Après l'installation des fichiers, Inno Setup lance `playwright install chromium` silencieusement. L'exe de Playwright est bundlé dans l'exe PyInstaller via `playwright._impl._driver` — Inno Setup appelle l'exe installé avec la commande Python embarquée.
+
+Méthode : Inno Setup appelle un helper `install_chromium.bat` déposé temporairement dans `{tmp}` :
+
+```bat
+@echo off
+"{app}\OmniSnap.exe" --install-chromium
+```
+
+Alternativement, si l'exe PyInstaller ne supporte pas les args CLI, on appelle directement `playwright install chromium` via `cmd /c` avec le Python système si disponible, ou via le module embarqué dans l'exe.
+
+**Implémentation concrète** : ajouter dans `main.py` la détection de `--install-chromium` comme argument CLI :
+
+```python
+if '--install-chromium' in sys.argv:
+    import subprocess
+    subprocess.run(['playwright', 'install', 'chromium'], check=False)
+    sys.exit(0)
+```
+
+Dans Inno Setup `[Run]` :
 
 ```ini
 [Run]
-Filename: "{app}\OmniSnap.exe"; Description: "{cm:LaunchProgram,OmniSnap}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\OmniSnap.exe"; Parameters: "--install-chromium"; \
+  StatusMsg: "Installation de Playwright Chromium (connexion internet requise)..."; \
+  Flags: waituntilterminated runhidden
+Filename: "{app}\OmniSnap.exe"; Description: "{cm:LaunchProgram,OmniSnap}"; \
+  Flags: nowait postinstall skipifsilent
 ```
+
+L'utilisateur voit une barre de progression "Installation de Playwright Chromium..." pendant le téléchargement (~300 MB). C'est transparent et silencieux.
 
 ---
 
@@ -189,8 +217,27 @@ SOFTWARE.
 
 ---
 
+## Dépendances optionnelles incluses
+
+### yt-dlp
+
+Ajouté aux `hiddenimports` de PyInstaller dans `OmniSnap.spec` :
+```python
+'yt_dlp',
+```
+Embarqué dans l'exe — aucune installation supplémentaire requise pour l'utilisateur.
+
+### Playwright Chromium
+
+- Le package Python `playwright` est déjà dans les `hiddenimports`
+- Le navigateur Chromium (~300 MB) est téléchargé automatiquement lors de l'installation via `--install-chromium`
+- Stocké dans `%USERPROFILE%\AppData\Local\ms-playwright\` (comportement standard Playwright)
+- Internet requis pendant l'installation (cohérent : OmniSnap est un web scraper)
+
+---
+
 ## Ce qui ne change pas
 
-- `core/`, `gui/` (sauf `theme.py`) — aucun changement
+- `core/`, `gui/` (sauf `theme.py`) — aucun changement sauf `main.py` (arg `--install-chromium`)
 - `tests/` — aucun test automatisé pour l'installateur (validation manuelle)
 - `scraper_modules/` — aucun changement
