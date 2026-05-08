@@ -13,11 +13,11 @@ WARNING      = "#FF9800"
 ERROR        = "#ef5350"
 LOG_BG       = "#0a0a1a"
 
-FONT_NORMAL = ("Segoe UI", 12)
-FONT_SMALL  = ("Segoe UI", 10)
-FONT_BOLD   = ("Segoe UI", 12, "bold")
-FONT_TITLE  = ("Segoe UI", 14, "bold")
-FONT_LOG    = ("Consolas", 10)
+FONT_NORMAL = ("Segoe UI", 14)
+FONT_SMALL  = ("Segoe UI", 13)
+FONT_BOLD   = ("Segoe UI", 14, "bold")
+FONT_TITLE  = ("Segoe UI", 17, "bold")
+FONT_LOG    = ("Consolas", 12)
 
 VERSION = "3.0.0"
 
