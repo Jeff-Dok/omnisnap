@@ -25,7 +25,8 @@ class App(ctk.CTk):
         super().__init__()
         self.title("OmniSnap")
         self.geometry("900x600")
-        self.resizable(False, False)
+        self.resizable(True, True)
+        self.minsize(900, 600)
         self.configure(fg_color=T.BG_MAIN)
         self._store = AppStore()
         T.apply_theme(self._store.get_settings().get("theme", "dark"))
@@ -41,6 +42,7 @@ class App(ctk.CTk):
             on_history=self._show_history,
             on_settings=self._show_settings,
             on_badge_click=self._show_queue_view,
+            on_recent_click=self._on_recent_click,
         )
         self._sidebar.pack(side="left", fill="y")
 
@@ -99,6 +101,7 @@ class App(ctk.CTk):
         self._history_view.pack(fill="both", expand=True)
         self._sidebar.set_active("history")
         self._refresh_badge(show_see_list=False)
+        self._update_recent()
 
     def _show_settings(self):
         self._hide_all()
@@ -124,14 +127,17 @@ class App(ctk.CTk):
     def _refresh_badge(self, show_see_list: bool = False) -> None:
         self._sidebar.update_badge(self._queue.count(), show_see_list=show_see_list)
 
-    def _enqueue(self, url: str, modes: list, depth: int, cookies_path: str | None):
-        task = QueuedTask(url=url, modes=modes, depth=depth, cookies_path=cookies_path)
+    def _enqueue(self, url: str, modes: list, depth: int, cookies_path: str | None,
+                 respect_robots: bool = False, url_filter: str = ""):
+        task = QueuedTask(url=url, modes=modes, depth=depth, cookies_path=cookies_path,
+                          respect_robots=respect_robots, url_filter=url_filter)
         self._queue.add(task)
         self._show_scrape_view()
 
     def _launch_queued(self, task: QueuedTask) -> None:
         self._launch(url=task.url, modes=task.modes, depth=task.depth,
-                     cookies_path=task.cookies_path)
+                     cookies_path=task.cookies_path, respect_robots=task.respect_robots,
+                     url_filter=task.url_filter)
 
     def _on_queue_remove(self, task_id: str) -> None:
         self._queue.remove(task_id)
@@ -152,7 +158,8 @@ class App(ctk.CTk):
         self._queue.clear()
         self._show_scrape_view()
 
-    def _launch(self, url: str, modes: list, depth: int, cookies_path: str | None):
+    def _launch(self, url: str, modes: list, depth: int, cookies_path: str | None,
+                respect_robots: bool = False, url_filter: str = ""):
         self._last_url = url
         self._store.save_settings({"last_url": url})
         dest_dir = self._store.get_settings().get("dest_dir", "")
@@ -162,6 +169,8 @@ class App(ctk.CTk):
             url=url, modes=modes, depth=depth,
             log_queue=log_queue, dest_base=dest_base,
             cookies_path=cookies_path,
+            respect_robots=respect_robots,
+            url_filter=url_filter,
         )
         self._show_scrape_view()
         self._scrape_view.start(url=url, modes=modes, depth=depth,
@@ -184,6 +193,7 @@ class App(ctk.CTk):
             "error_msg": result.get("error_msg"),
         }
         self._store.add_entry(entry)
+        self._update_recent()
         settings = self._store.get_settings()
         if settings.get("notifications", True) and result["status"] in ("done", "error"):
             notify(result["status"], result["url"], result)
@@ -205,3 +215,12 @@ class App(ctk.CTk):
         self._last_url = entry["url"]
         self._show_wizard()
         self._wizard.prefill(url=entry["url"], modes=entry["modes"], depth=entry["depth"])
+
+    def _update_recent(self) -> None:
+        """Met à jour la section Récent de la sidebar avec les 3 dernières entrées."""
+        self._sidebar.update_recent(self._store.get_history()[:3])
+
+    def _on_recent_click(self, entry_id: str) -> None:
+        """Navigue vers l'historique et sélectionne l'entrée cliquée."""
+        self._show_history()
+        self._history_view._select_entry(entry_id)
