@@ -1,10 +1,13 @@
+# build/OmniSnap.spec
 import sys
 from pathlib import Path
 import customtkinter
+import playwright
 
 block_cipher = None
 
 ctk_path = Path(customtkinter.__file__).parent
+playwright_driver = Path(playwright.__file__).parent / 'driver'
 
 a = Analysis(
     ['../main.py'],
@@ -12,6 +15,7 @@ a = Analysis(
     binaries=[],
     datas=[
         (str(ctk_path), 'customtkinter'),
+        (str(playwright_driver), 'playwright/driver'),
     ],
     hiddenimports=[
         'customtkinter',
@@ -37,6 +41,9 @@ a = Analysis(
         'gui.queue_view',
         'gui.theme',
         'winotify',
+        'playwright',
+        'playwright._impl._driver',
+        'yt_dlp',
     ],
     hookspath=[],
     runtime_hooks=[],
@@ -61,4 +68,6 @@ exe = EXE(
     runtime_tmpdir=None,
     console=False,
     windowed=True,
+    icon='../assets/omnisnap.ico',
+    version='version_info.txt',
 )
