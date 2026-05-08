@@ -133,13 +133,15 @@ class QueueView(ctk.CTkFrame):
                 icon, name = _MODES_DICT[mode_id]
                 modes_names.append(f"{icon} {name}")
 
-        # Tronquer si plus de 3 modes
-        if len(modes_names) > 3:
-            modes_str = " · ".join(modes_names[:3]) + " · ..."
+        # Construire la chaîne de détail
+        if modes_names:
+            display = modes_names[:3]
+            if len(modes_names) > 3:
+                display = display + ["..."]
+            modes_str = " · ".join(display)
+            detail = f"{modes_str} · profondeur: {task.depth}"
         else:
-            modes_str = " · ".join(modes_names)
-
-        detail = f"{modes_str} · profondeur: {task.depth}"
+            detail = f"profondeur: {task.depth}"
         ctk.CTkLabel(
             text_block, text=detail,
             font=("Segoe UI", 10), text_color="#64748b",

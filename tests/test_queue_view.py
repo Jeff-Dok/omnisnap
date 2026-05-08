@@ -35,8 +35,8 @@ def test_refresh_with_tasks(ctk_root):
     from gui.queue_view import QueueView
     from core.queue import QueuedTask
     tasks = [
-        QueuedTask(url="https://python.org", modes=[0, 1], depth=2, cookies_path=None),
-        QueuedTask(url="https://libreoffice.org", modes=[0], depth=0, cookies_path=None),
+        QueuedTask(url="https://python.org", modes=[1, 5, 7], depth=2, cookies_path=None),
+        QueuedTask(url="https://libreoffice.org", modes=[1, 2, 3, 4], depth=0, cookies_path=None),
     ]
     view = QueueView(
         ctk_root,
