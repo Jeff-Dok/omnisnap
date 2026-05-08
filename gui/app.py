@@ -9,6 +9,7 @@ import customtkinter as ctk
 
 from core.runner import ScraperRunner
 from core.store import AppStore
+from core.notifier import notify
 from gui import theme as T
 from gui.history_view import HistoryView
 from gui.scrape_view import ScrapeView
@@ -116,6 +117,8 @@ class App(ctk.CTk):
             "error_msg": result.get("error_msg"),
         }
         self._store.add_entry(entry)
+        if self._store.get_settings().get("notifications", True):
+            notify(result["status"], result["url"], result)
         if result["status"] == "done" and self._store.get_settings().get("auto_open"):
             dest = entry["dest_path"]
             if dest:
