@@ -1,3 +1,4 @@
+import re
 import customtkinter as ctk
 from tkinter import filedialog
 from gui import theme as T
@@ -246,6 +247,7 @@ class Wizard(ctk.CTkFrame):
 
         engine_row = ctk.CTkFrame(sc, fg_color="transparent")
         engine_row.pack(fill="x", pady=(0, 4))
+        self._engine_row = engine_row
 
         self._btn_requests = ctk.CTkButton(
             engine_row, text="⚡ Requests", font=T.FONT_BOLD, width=140, height=40,
@@ -394,7 +396,7 @@ class Wizard(ctk.CTkFrame):
         self._btn_requests.configure(fg_color=T.BG_SURFACE, hover_color=T.BORDER,
                                       text_color=T.TEXT_DIM)
         # Insert after engine_row — pack in scrollable frame
-        self._playwright_frame.pack(fill="x", pady=(6, 4))
+        self._playwright_frame.pack(fill="x", pady=(6, 4), after=self._engine_row)
 
     def _select_delay(self, val, label: str, idx: int):
         for i, btn in enumerate(self._delay_btns):
@@ -442,7 +444,10 @@ class Wizard(ctk.CTkFrame):
         vp_custom_visible = self._viewport_custom_frame.winfo_manager() != ""
         if vp_custom_visible:
             raw = self._viewport_custom_entry.get().strip()
-            opts["viewport"] = raw if raw else "1280x720"
+            if raw and re.match(r"^\d+x\d+$", raw):
+                opts["viewport"] = raw
+            else:
+                opts["viewport"] = "1280x720"
         else:
             opts["viewport"] = self._viewport_val
         self._playwright_opts = opts
@@ -681,6 +686,7 @@ class Wizard(ctk.CTkFrame):
 
     def show_recap(self):
         """Mettre à jour le récapitulatif avant affichage de l'étape 3."""
+        self._collect_ext_filters()
         self._recap_url.configure(text=f"🔗 {self._url}")
         mode_names = [name for mid, _, name, _ in MODES if mid in self._modes]
         self._recap_modes.configure(text="Types : " + ", ".join(mode_names))
@@ -737,6 +743,7 @@ class Wizard(ctk.CTkFrame):
         self._btn_playwright.configure(fg_color=T.BG_SURFACE, hover_color=T.BORDER,
                                         text_color=T.TEXT_DIM)
         self._playwright_frame.pack_forget()
+        self._pw_css_entry.delete(0, "end")
         # Reset delay/viewport to defaults
         self._delay_val = 2
         self._viewport_val = "1280x720"
