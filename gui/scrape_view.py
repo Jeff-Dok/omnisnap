@@ -293,8 +293,12 @@ class ScrapeView(ctk.CTkFrame):
 
     def _show_cancel_dialog(self, queue_count: int = 0):
         dlg = ctk.CTkToplevel(self)
-        dlg.title("Annuler le scraping")
+        dlg.title("Annuler le scraping ?")
         dlg.geometry("360x160")
+        dlg.update_idletasks()
+        px = self.winfo_rootx() + (self.winfo_width() - 360) // 2
+        py = self.winfo_rooty() + (self.winfo_height() - 160) // 2
+        dlg.geometry(f"360x160+{px}+{py}")
         dlg.resizable(False, False)
         dlg.grab_set()
         dlg.lift()
@@ -311,7 +315,7 @@ class ScrapeView(ctk.CTkFrame):
 
         if queue_count > 0:
             # 3 boutons : annuler cette tâche / annuler tout / retour
-            ctk.CTkButton(btn_row, text="Cette tâche seulement",
+            ctk.CTkButton(btn_row, text="Annuler le scraping",
                           fg_color="#c0392b", hover_color="#a93226", text_color="#ffffff",
                           font=T.FONT_SMALL, height=32,
                           command=lambda: [dlg.destroy(), self._cancel_fn()]).pack(fill="x", pady=(0, 6))
