@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 VSVersionInfo(
   ffi=FixedFileInfo(
     filevers=(3, 0, 0, 0),
@@ -13,10 +14,12 @@ VSVersionInfo(
     StringFileInfo([
       StringTable(
         '040904B0',
-        [StringStruct('CompanyName', 'JeffDok Média'),
-         StringStruct('FileDescription', 'OmniSnap — Web Scraper'),
+        [StringStruct('CompanyName', 'JeffDok Media'),
+         StringStruct('FileDescription', 'OmniSnap - Web Scraper'),
          StringStruct('FileVersion', '3.0.0.0'),
-         StringStruct('LegalCopyright', '© 2026 JeffDok Média — MIT License'),
+         StringStruct('InternalName', 'OmniSnap'),
+         StringStruct('LegalCopyright', 'Copyright 2026 JeffDok Media. MIT License.'),
+         StringStruct('OriginalFilename', 'OmniSnap.exe'),
          StringStruct('ProductName', 'OmniSnap'),
          StringStruct('ProductVersion', '3.0.0')])
     ]),
