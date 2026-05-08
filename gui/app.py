@@ -37,6 +37,7 @@ class App(ctk.CTk):
             on_new_scrape=self._show_wizard,
             on_history=self._show_history,
             on_settings=self._show_settings,
+            on_badge_click=lambda: None,
         )
         self._sidebar.pack(side="left", fill="y")
 
