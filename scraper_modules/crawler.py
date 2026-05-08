@@ -445,6 +445,7 @@ def crawl(
         return
     visited.add(url)
     _log = log or print
+    _log(f"🔍 {url}")
     if progress and task_url is not None:
         n = len(visited)
         label = "page visitée" if n == 1 else "pages visitées"

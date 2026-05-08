@@ -22,6 +22,8 @@ class ScrapeView(ctk.CTkFrame):
         self._dest: str = ""
         self._poll_job = None
         self._cancel_fn = None
+        self._queue_count_fn = None
+        self._queue_clear_fn = None
         self._page_count = 0
         self._file_count = 0
         self._url: str = ""
@@ -104,13 +106,15 @@ class ScrapeView(ctk.CTkFrame):
     # ── Démarrer ──────────────────────────────────────────────────────────────
 
     def start(self, url: str, modes: list[int], depth: int, log_queue: queue.Queue,
-              runner_cancel_fn):
+              runner_cancel_fn, queue_count_fn=None, queue_clear_fn=None):
         from gui.wizard import MODES
         if self._poll_job:
             self.after_cancel(self._poll_job)
             self._poll_job = None
         self._log_queue = log_queue
         self._cancel_fn = runner_cancel_fn
+        self._queue_count_fn = queue_count_fn
+        self._queue_clear_fn = queue_clear_fn
         self._url = url
         self._modes = modes
         self._depth = depth
@@ -175,6 +179,8 @@ class ScrapeView(ctk.CTkFrame):
         elif "↓" in text or "télécharg" in text.lower():
             color = T.ACCENT
             self._file_count += 1
+        elif "🔍" in text:
+            color = T.ACCENT
         elif "⚠" in text:
             color = T.WARNING
         elif "✗" in text:
@@ -279,8 +285,55 @@ class ScrapeView(ctk.CTkFrame):
             self._on_add_task()
 
     def _cancel(self):
-        if hasattr(self, "_cancel_fn") and self._cancel_fn:
-            self._cancel_fn()
+        if not (hasattr(self, "_cancel_fn") and self._cancel_fn):
+            return
+        self._show_cancel_dialog(
+            queue_count=self._queue_count_fn() if self._queue_count_fn else 0
+        )
+
+    def _show_cancel_dialog(self, queue_count: int = 0):
+        dlg = ctk.CTkToplevel(self)
+        dlg.title("Annuler le scraping")
+        dlg.geometry("360x160")
+        dlg.resizable(False, False)
+        dlg.grab_set()
+        dlg.lift()
+
+        if queue_count > 0:
+            msg = f"Annuler la tâche en cours ?\n{queue_count} tâche(s) en attente seront affectées."
+        else:
+            msg = "Annuler le scraping en cours ?"
+
+        ctk.CTkLabel(dlg, text=msg, font=T.FONT_NORMAL, wraplength=320).pack(pady=(20, 16))
+
+        btn_row = ctk.CTkFrame(dlg, fg_color="transparent")
+        btn_row.pack(fill="x", padx=20)
+
+        if queue_count > 0:
+            # 3 boutons : annuler cette tâche / annuler tout / retour
+            ctk.CTkButton(btn_row, text="Cette tâche seulement",
+                          fg_color="#c0392b", hover_color="#a93226", text_color="#ffffff",
+                          font=T.FONT_SMALL, height=32,
+                          command=lambda: [dlg.destroy(), self._cancel_fn()]).pack(fill="x", pady=(0, 6))
+            ctk.CTkButton(btn_row, text="Annuler tout + vider la file",
+                          fg_color="#7f1d1d", hover_color="#991b1b", text_color="#ffffff",
+                          font=T.FONT_SMALL, height=32,
+                          command=lambda: [dlg.destroy(), self._cancel_fn(),
+                                           self._queue_clear_fn() if self._queue_clear_fn else None]).pack(fill="x", pady=(0, 6))
+            ctk.CTkButton(btn_row, text="← Retour",
+                          fg_color=T.BG_SURFACE, hover_color=T.BORDER, text_color=T.TEXT_DIM,
+                          font=T.FONT_SMALL, height=32,
+                          command=dlg.destroy).pack(fill="x")
+        else:
+            # 2 boutons : confirmer / retour
+            ctk.CTkButton(btn_row, text="Annuler le scraping",
+                          fg_color="#c0392b", hover_color="#a93226", text_color="#ffffff",
+                          font=T.FONT_NORMAL, height=34, width=160,
+                          command=lambda: [dlg.destroy(), self._cancel_fn()]).pack(side="left", padx=(0, 8))
+            ctk.CTkButton(btn_row, text="← Retour",
+                          fg_color=T.BG_SURFACE, hover_color=T.BORDER, text_color=T.TEXT_DIM,
+                          font=T.FONT_NORMAL, height=34, width=100,
+                          command=dlg.destroy).pack(side="left")
 
     def _open_folder(self):
         if self._dest and Path(self._dest).exists():

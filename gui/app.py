@@ -200,7 +200,9 @@ class App(ctk.CTk):
         self._show_scrape_view()
         self._scrape_view.start(url=url, modes=modes, depth=depth,
                                  log_queue=log_queue,
-                                 runner_cancel_fn=self._runner.cancel)
+                                 runner_cancel_fn=self._runner.cancel,
+                                 queue_count_fn=self._queue.count,
+                                 queue_clear_fn=self._queue.clear)
         self._runner.start()
 
     def _on_scrape_done(self, result: dict):
