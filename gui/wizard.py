@@ -24,9 +24,11 @@ DEPTH_LABELS = [
 class Wizard(ctk.CTkFrame):
     """Wizard 4 étapes : URL → Contenu → Options → Lancer."""
 
-    def __init__(self, master, on_launch, last_url: str = "", **kwargs):
+    def __init__(self, master, on_launch, on_enqueue=None, last_url: str = "", **kwargs):
         super().__init__(master, fg_color=T.BG_MAIN, corner_radius=0, **kwargs)
         self._on_launch = on_launch
+        self._on_enqueue = on_enqueue
+        self._enqueue_mode = False
         self._step = 0
         self._url = last_url
         self._modes: set[int] = set()
@@ -285,10 +287,13 @@ class Wizard(ctk.CTkFrame):
                       fg_color=T.BG_SURFACE, hover_color=T.BORDER,
                       text_color=T.TEXT_DIM, height=36,
                       command=self._prev).pack(side="left")
-        ctk.CTkButton(self._nav_step3, text="▶ Lancer le scraping", font=T.FONT_BOLD,
-                      fg_color=T.ACCENT, hover_color=T.ACCENT_HOVER,
-                      text_color=T.LOG_BG, height=36,
-                      command=self._launch).pack(side="right")
+        self._btn_launch = ctk.CTkButton(
+            self._nav_step3, text="▶ Lancer le scraping", font=T.FONT_BOLD,
+            fg_color=T.ACCENT, hover_color=T.ACCENT_HOVER,
+            text_color=T.LOG_BG, height=36,
+            command=self._launch,
+        )
+        self._btn_launch.pack(side="right")
 
     def _toggle_advanced(self):
         self._adv_visible = not self._adv_visible
@@ -312,12 +317,16 @@ class Wizard(ctk.CTkFrame):
 
     def _launch(self):
         self._cookies_path = self._cookies_entry.get().strip()
-        self._on_launch(
+        params = dict(
             url=self._url,
             modes=sorted(self._modes),
             depth=self._depth,
             cookies_path=self._cookies_path or None,
         )
+        if self._enqueue_mode and self._on_enqueue:
+            self._on_enqueue(**params)
+        else:
+            self._on_launch(**params)
 
     def show_recap(self):
         """Mettre à jour le récapitulatif avant affichage de l'étape 3."""
@@ -346,6 +355,8 @@ class Wizard(ctk.CTkFrame):
             self._adv_visible = False
             self._adv_btn.configure(text="▸ Options avancées (optionnel)")
             self._adv_frame.pack_forget()
+        self._enqueue_mode = False
+        self._btn_launch.configure(text="▶ Lancer le scraping")
         self._show_step(0)
 
     def prefill(self, url: str, modes: list, depth: int) -> None:
@@ -362,3 +373,8 @@ class Wizard(ctk.CTkFrame):
                 self._modes.add(mode_id)
         depth_idx = max(0, min(depth, len(DEPTH_LABELS) - 1))
         self._select_depth(depth_idx, DEPTH_LABELS[depth_idx][1])
+
+    def set_enqueue_mode(self, active: bool) -> None:
+        self._enqueue_mode = active
+        text = "➕ Ajouter aux tâches en attente" if active else "▶ Lancer le scraping"
+        self._btn_launch.configure(text=text)
