@@ -65,6 +65,7 @@ class ScrapeView(ctk.CTkFrame):
             command=self._add_task,
         )
         self._btn_add.pack(side="right", padx=(0, 8))
+        self._btn_add.pack_forget()
 
         self._modes_row = ctk.CTkFrame(top_inner, fg_color="transparent")
         self._modes_row.pack(fill="x", pady=(4, 0))

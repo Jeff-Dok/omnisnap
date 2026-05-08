@@ -46,8 +46,11 @@ class App(ctk.CTk):
 
         self._wizard = Wizard(self._main, on_launch=self._launch,
                                last_url=self._last_url)
-        self._scrape_view = ScrapeView(self._main, on_new_scrape=self._show_wizard,
-                                        on_done=self._on_scrape_done)
+        self._scrape_view = ScrapeView(
+            self._main, on_new_scrape=self._show_wizard,
+            on_done=self._on_scrape_done,
+            on_add_task=lambda: None,
+        )
         self._history_view = HistoryView(
             self._main, store=self._store,
             on_relaunch=self._relaunch_direct,
