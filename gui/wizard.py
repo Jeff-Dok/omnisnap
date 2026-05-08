@@ -540,7 +540,7 @@ class Wizard(ctk.CTkFrame):
                      font=T.FONT_TITLE, text_color=T.TEXT).pack(anchor="w", pady=(0, 10))
 
         recap = ctk.CTkFrame(f, fg_color=T.BG_SURFACE, corner_radius=6)
-        recap.pack(fill="x", pady=(0, 10))
+        recap.pack(fill="both", expand=True, pady=(0, 10))
         self._recap_url = ctk.CTkLabel(recap, text="", font=T.FONT_SMALL,
                                         text_color=T.TEXT, anchor="w", padx=12, pady=6)
         self._recap_url.pack(fill="x")
@@ -550,6 +550,9 @@ class Wizard(ctk.CTkFrame):
         self._recap_depth = ctk.CTkLabel(recap, text="", font=T.FONT_SMALL,
                                           text_color=T.TEXT_DIM, anchor="w", padx=12, pady=6)
         self._recap_depth.pack(fill="x")
+        self._recap_engine = ctk.CTkLabel(recap, text="", font=T.FONT_SMALL,
+                                           text_color=T.TEXT_DIM, anchor="w", padx=12, pady=4)
+        self._recap_engine.pack(fill="x")
 
         self._adv_visible = False
         self._adv_btn = ctk.CTkButton(
@@ -560,6 +563,10 @@ class Wizard(ctk.CTkFrame):
             command=self._toggle_advanced,
         )
         self._adv_btn.pack(fill="x", pady=(0, 4))
+
+        self._adv_summary_lbl = ctk.CTkLabel(f, text="", font=T.FONT_SMALL,
+                                              text_color=T.TEXT_DIM, anchor="w")
+        self._adv_summary_lbl.pack(fill="x", padx=4)
 
         self._adv_frame = ctk.CTkFrame(f, fg_color=T.BG_SURFACE, corner_radius=6)
 
@@ -682,17 +689,25 @@ class Wizard(ctk.CTkFrame):
             (desc for _, desc, val in DEPTH_LABELS if val == self._depth),
             f"Profondeur {self._depth}",
         )
-        engine = "🎭 Playwright" if self._use_playwright else "⚡ Requests"
-        # Count active extension filters (non-None)
+        self._recap_depth.configure(text=f"Profondeur : {depth_label}")
+
+        # Moteur + filtres d'extensions
+        engine = "Playwright" if self._use_playwright else "Requests"
         active_filters = sum(
             1 for attr in ("_img_ext_filter", "_vid_ext_filter", "_aud_ext_filter",
                            "_doc_ext_filter", "_arc_ext_filter")
             if getattr(self, attr) is not None
         )
-        filter_info = f" — {active_filters} filtre(s) actif(s)" if active_filters else ""
-        self._recap_depth.configure(
-            text=f"Profondeur : {depth_label} | Moteur : {engine}{filter_info}"
-        )
+        filter_str = f" · {active_filters} filtre(s) actif(s)" if active_filters else ""
+        self._recap_engine.configure(text=f"Moteur : {engine}{filter_str}")
+
+        # Résumé options avancées
+        parts = []
+        if self._respect_robots:
+            parts.append("robots.txt respecté")
+        if self._url_filter:
+            parts.append(f"filtre URL: {self._url_filter[:20]}")
+        self._adv_summary_lbl.configure(text=" · ".join(parts) if parts else "")
 
     def reset(self, last_url: str = ""):
         """Réinitialiser le wizard pour un nouveau scrape."""
@@ -750,6 +765,12 @@ class Wizard(ctk.CTkFrame):
             self._adv_visible = False
             self._adv_btn.configure(text="▸ Options avancées (optionnel)")
             self._adv_frame.pack_forget()
+        # Reset recap labels
+        self._recap_url.configure(text="")
+        self._recap_modes.configure(text="")
+        self._recap_depth.configure(text="")
+        self._recap_engine.configure(text="")
+        self._adv_summary_lbl.configure(text="")
         self._enqueue_mode = False
         self._btn_launch.configure(text="▶ Lancer le scraping")
         self._show_step(0)
