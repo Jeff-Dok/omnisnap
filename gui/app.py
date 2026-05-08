@@ -1,7 +1,7 @@
 # gui/app.py
 import datetime
 import os
-import queue
+import queue as stdlib_queue
 import uuid
 from pathlib import Path
 
@@ -10,8 +10,10 @@ import customtkinter as ctk
 from core.runner import ScraperRunner
 from core.store import AppStore
 from core.notifier import notify
+from core.queue import QueueManager, QueuedTask
 from gui import theme as T
 from gui.history_view import HistoryView
+from gui.queue_view import QueueView
 from gui.scrape_view import ScrapeView
 from gui.settings_view import SettingsView
 from gui.sidebar import Sidebar
@@ -29,6 +31,7 @@ class App(ctk.CTk):
         T.apply_theme(self._store.get_settings().get("theme", "dark"))
         self._runner: ScraperRunner | None = None
         self._last_url = self._store.get_settings().get("last_url", "")
+        self._queue: QueueManager = QueueManager()
         self._build()
 
     def _build(self):
@@ -37,19 +40,22 @@ class App(ctk.CTk):
             on_new_scrape=self._show_wizard,
             on_history=self._show_history,
             on_settings=self._show_settings,
-            on_badge_click=lambda: None,
+            on_badge_click=self._show_queue_view,
         )
         self._sidebar.pack(side="left", fill="y")
 
         self._main = ctk.CTkFrame(self, fg_color=T.BG_MAIN, corner_radius=0)
         self._main.pack(side="left", fill="both", expand=True)
 
-        self._wizard = Wizard(self._main, on_launch=self._launch,
-                               last_url=self._last_url)
+        self._wizard = Wizard(
+            self._main, on_launch=self._launch,
+            on_enqueue=self._enqueue,
+            last_url=self._last_url,
+        )
         self._scrape_view = ScrapeView(
             self._main, on_new_scrape=self._show_wizard,
             on_done=self._on_scrape_done,
-            on_add_task=lambda: None,
+            on_add_task=self._show_wizard_enqueue,
         )
         self._history_view = HistoryView(
             self._main, store=self._store,
@@ -60,11 +66,19 @@ class App(ctk.CTk):
             self._main, store=self._store,
             on_theme_change=T.apply_theme,
         )
+        self._queue_view = QueueView(
+            self._main,
+            on_close=self._show_scrape_view,
+            on_edit=self._on_queue_edit,
+            on_remove=self._on_queue_remove,
+            on_add=self._show_wizard_enqueue,
+            on_clear=self._on_queue_clear,
+        )
         self._show_wizard()
 
     def _hide_all(self):
         for view in (self._wizard, self._scrape_view,
-                     self._history_view, self._settings_view):
+                     self._history_view, self._settings_view, self._queue_view):
             view.pack_forget()
 
     def _show_wizard(self):
@@ -72,29 +86,78 @@ class App(ctk.CTk):
         self._wizard.pack(fill="both", expand=True)
         self._wizard.reset(last_url=self._last_url)
         self._sidebar.set_active("scrape")
+        self._refresh_badge(show_see_list=False)
 
     def _show_scrape_view(self):
         self._hide_all()
         self._scrape_view.pack(fill="both", expand=True)
+        self._refresh_badge(show_see_list=True)
 
     def _show_history(self):
         self._hide_all()
         self._history_view.refresh()
         self._history_view.pack(fill="both", expand=True)
         self._sidebar.set_active("history")
+        self._refresh_badge(show_see_list=False)
 
     def _show_settings(self):
         self._hide_all()
         self._settings_view.refresh()
         self._settings_view.pack(fill="both", expand=True)
         self._sidebar.set_active("settings")
+        self._refresh_badge(show_see_list=False)
+
+    def _show_queue_view(self):
+        self._hide_all()
+        self._queue_view.refresh(self._queue.all())
+        self._queue_view.pack(fill="both", expand=True)
+        self._refresh_badge(show_see_list=False)
+
+    def _show_wizard_enqueue(self):
+        self._hide_all()
+        self._wizard.pack(fill="both", expand=True)
+        self._wizard.reset(last_url=self._last_url)
+        self._wizard.set_enqueue_mode(True)
+        self._sidebar.set_active("scrape")
+        self._refresh_badge(show_see_list=False)
+
+    def _refresh_badge(self, show_see_list: bool = False) -> None:
+        self._sidebar.update_badge(self._queue.count(), show_see_list=show_see_list)
+
+    def _enqueue(self, url: str, modes: list, depth: int, cookies_path: str | None):
+        task = QueuedTask(url=url, modes=modes, depth=depth, cookies_path=cookies_path)
+        self._queue.add(task)
+        self._show_scrape_view()
+
+    def _launch_queued(self, task: QueuedTask) -> None:
+        self._launch(url=task.url, modes=task.modes, depth=task.depth,
+                     cookies_path=task.cookies_path)
+
+    def _on_queue_remove(self, task_id: str) -> None:
+        self._queue.remove(task_id)
+        if self._queue.count() == 0:
+            self._show_scrape_view()
+        else:
+            self._queue_view.refresh(self._queue.all())
+            self._refresh_badge(show_see_list=False)
+
+    def _on_queue_edit(self, task_id: str) -> None:
+        task = next((t for t in self._queue.all() if t.id == task_id), None)
+        if task:
+            self._queue.remove(task.id)
+            self._show_wizard_enqueue()
+            self._wizard.prefill(url=task.url, modes=task.modes, depth=task.depth)
+
+    def _on_queue_clear(self) -> None:
+        self._queue.clear()
+        self._show_scrape_view()
 
     def _launch(self, url: str, modes: list, depth: int, cookies_path: str | None):
         self._last_url = url
         self._store.save_settings({"last_url": url})
         dest_dir = self._store.get_settings().get("dest_dir", "")
         dest_base = Path(dest_dir) if dest_dir else None
-        log_queue: queue.Queue = queue.Queue()
+        log_queue: stdlib_queue.Queue = stdlib_queue.Queue()
         self._runner = ScraperRunner(
             url=url, modes=modes, depth=depth,
             log_queue=log_queue, dest_base=dest_base,
@@ -131,6 +194,9 @@ class App(ctk.CTk):
                     os.startfile(dest)
                 except Exception:
                     pass
+        next_task = self._queue.next()
+        if next_task:
+            self._launch_queued(next_task)
 
     def _relaunch_direct(self, url: str, modes: list, depth: int):
         self._launch(url=url, modes=modes, depth=depth, cookies_path=None)
