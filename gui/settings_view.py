@@ -64,7 +64,7 @@ class SettingsView(ctk.CTkFrame):
         # Comportement
         self._sec(body, "Comportement")
         toggle_row = ctk.CTkFrame(body, fg_color="transparent")
-        toggle_row.pack(fill="x", pady=(0, 16))
+        toggle_row.pack(fill="x", pady=(0, 24))
         info = ctk.CTkFrame(toggle_row, fg_color="transparent")
         info.pack(side="left", fill="x", expand=True)
         ctk.CTkLabel(info, text="Ouvrir le dossier après scraping",
@@ -82,7 +82,7 @@ class SettingsView(ctk.CTkFrame):
         self._switch_auto.pack(side="right", padx=(16, 0))
 
         notif_row = ctk.CTkFrame(body, fg_color="transparent")
-        notif_row.pack(fill="x", pady=(0, 16))
+        notif_row.pack(fill="x", pady=(0, 24))
         notif_info = ctk.CTkFrame(notif_row, fg_color="transparent")
         notif_info.pack(side="left", fill="x", expand=True)
         ctk.CTkLabel(notif_info, text="Notifications Windows",
@@ -108,16 +108,18 @@ class SettingsView(ctk.CTkFrame):
                      font=T.FONT_SMALL, text_color=T.TEXT_DIM).pack(side="left")
         ctk.CTkLabel(row, text=f"Version {T.VERSION}",
                      font=T.FONT_SMALL, text_color=T.TEXT_DIM).pack(side="right")
+        ctk.CTkLabel(body, text="https://github.com/Jeff-Dok/omnisnap",
+                     font=T.FONT_SMALL, text_color=T.ACCENT, anchor="w").pack(fill="x", pady=(4, 0))
 
     @staticmethod
     def _sec(parent, text: str):
         ctk.CTkLabel(parent, text=text.upper(), font=("Segoe UI", 10, "bold"),
-                     text_color=T.TEXT_DIM, anchor="w").pack(fill="x", pady=(0, 8))
+                     text_color=T.TEXT_DIM, anchor="w").pack(fill="x", pady=(8, 8))
 
     @staticmethod
     def _div(parent):
         ctk.CTkFrame(parent, height=1, fg_color=T.BORDER,
-                     corner_radius=0).pack(fill="x", pady=(0, 16))
+                     corner_radius=0).pack(fill="x", pady=(0, 20))
 
     def refresh(self) -> None:
         settings = self._store.get_settings()

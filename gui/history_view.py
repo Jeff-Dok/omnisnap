@@ -183,6 +183,10 @@ class HistoryView(ctk.CTkFrame):
             command=self._clear_all,
         ).pack(side="right")
 
+        self._lbl_stats = ctk.CTkLabel(header, text="", font=T.FONT_SMALL,
+                                        text_color=T.TEXT_DIM, anchor="w")
+        self._lbl_stats.pack(fill="x", padx=20, pady=(0, 10))
+
         self._list = ctk.CTkScrollableFrame(self, fg_color=T.BG_MAIN, corner_radius=0)
         self._list.pack(fill="both", expand=True)
 
@@ -219,6 +223,7 @@ class HistoryView(ctk.CTkFrame):
         self._rows.clear()
         history = self._store.get_history()
         if not history:
+            self._lbl_stats.configure(text="")
             ctk.CTkLabel(
                 self._list,
                 text="🕐\n\nAucun scrape dans l'historique.\n"
@@ -227,6 +232,13 @@ class HistoryView(ctk.CTkFrame):
             ).pack(expand=True, pady=60)
             self._hide_action_bar()
             return
+
+        # Calculate statistics
+        total_files = sum(e.get("file_count", 0) for e in history)
+        total_mb = sum(e.get("size_mb", 0.0) for e in history)
+        n = len(history)
+        stats_text = f"{n} scrape{'s' if n > 1 else ''} · {total_files} fichier{'s' if total_files > 1 else ''} · {total_mb:.1f} MB total"
+        self._lbl_stats.configure(text=stats_text)
 
         for entry in history:
             selected = (entry["id"] == self._selected_id)
