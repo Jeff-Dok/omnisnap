@@ -33,6 +33,7 @@ class App(ctk.CTk):
         self._runner: ScraperRunner | None = None
         self._last_url = self._store.get_settings().get("last_url", "")
         self._queue: QueueManager = QueueManager()
+        self._editing_task_id: str | None = None
         self._build()
 
     def _build(self):
@@ -141,6 +142,9 @@ class App(ctk.CTk):
             aud_ext_filter=aud_ext_filter, doc_ext_filter=doc_ext_filter,
             arc_ext_filter=arc_ext_filter,
         )
+        if self._editing_task_id is not None:
+            self._queue.remove(self._editing_task_id)
+            self._editing_task_id = None
         self._queue.add(task)
         self._show_scrape_view()
 
@@ -164,7 +168,7 @@ class App(ctk.CTk):
     def _on_queue_edit(self, task_id: str) -> None:
         task = next((t for t in self._queue.all() if t.id == task_id), None)
         if task:
-            self._queue.remove(task.id)
+            self._editing_task_id = task.id
             self._show_wizard_enqueue()
             self._wizard.prefill(url=task.url, modes=task.modes, depth=task.depth)
 

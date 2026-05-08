@@ -450,6 +450,13 @@ class Wizard(ctk.CTkFrame):
                 opts["viewport"] = "1280x720"
         else:
             opts["viewport"] = self._viewport_val
+        # Convertir viewport string → tuple
+        if "viewport" in opts:
+            try:
+                w, h = opts["viewport"].split("x")
+                opts["viewport"] = (int(w), int(h))
+            except (ValueError, AttributeError):
+                opts["viewport"] = (1280, 720)
         self._playwright_opts = opts
 
     def _refresh_mode_options(self):
@@ -462,9 +469,9 @@ class Wizard(ctk.CTkFrame):
         modes_with_filters = [m for m in sorted(self._modes) if m in EXT_FILTERS]
 
         if modes_with_filters:
+            self._mode_opts_container.pack(fill="x", before=self._depth_desc)
             self._mode_opts_header.pack(anchor="w", pady=(10, 4),
                                          before=self._mode_opts_container)
-            self._mode_opts_container.pack(fill="x", before=self._depth_desc)
         else:
             self._mode_opts_header.pack_forget()
             self._mode_opts_container.pack_forget()
